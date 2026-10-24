@@ -1,0 +1,312 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\Product;
+use Illuminate\Database\Seeder;
+
+class ProductSeeder extends Seeder
+{
+    public function run(): void
+    {
+        $products = [
+            // -----------------------------
+            // Kategori 1: KAMERA
+            // -----------------------------
+            [
+                'category_id' => 1,
+                'name' => 'Canon EOS 1500D',
+                'slug' => 'canon-eos-1500d',
+                'description' => 'Kamera DSLR 24.1 MP dengan sensor APS-C untuk fotografi pemula, dokumentasi acara, dan tugas kuliah.',
+                'price_per_day' => 150000,
+                'stock' => 3,
+                'condition' => 'baik',
+                'image' => 'canon-eos-1500d.jpg',
+                'is_active' => true,
+            ],
+            [
+                'category_id' => 1,
+                'name' => 'Sony Alpha A7 III',
+                'slug' => 'sony-alpha-a7-iii',
+                'description' => 'Kamera mirrorless full-frame profesional 24.2 MP dengan perekaman 4K HDR dan autofokus real-time eye AF.',
+                'price_per_day' => 250000,
+                'stock' => 2,
+                'condition' => 'sangat baik',
+                'image' => 'sony-alpha-a7-iii.png',
+                'is_active' => true,
+            ],
+            [
+                'category_id' => 1,
+                'name' => 'Canon EOS R50',
+                'slug' => 'canon-eos-r50',
+                'description' => 'Kamera mirrorless RF-mount ringkas dan ringan, ideal untuk content creation, vlogging, dan travel photography.',
+                'price_per_day' => 200000,
+                'stock' => 3,
+                'condition' => 'sangat baik',
+                'image' => 'canon-eos-r50.png',
+                'is_active' => true,
+            ],
+            [
+                'category_id' => 1,
+                'name' => 'DJI Mini 3 Pro',
+                'slug' => 'dji-mini-3-pro',
+                'description' => 'Drone lipat ultra-ringan di bawah 249g dengan video 4K/60fps HDR, sensor rintangan tri-directional, dan pemotretan vertikal.',
+                'price_per_day' => 220000,
+                'stock' => 2,
+                'condition' => 'sangat baik',
+                'image' => 'dji-mini-3-pro.png',
+                'is_active' => true,
+            ],
+
+            // -----------------------------
+            // Kategori 2: LENSA
+            // -----------------------------
+            [
+                'category_id' => 2,
+                'name' => 'Canon EF 50mm f/1.8 STM',
+                'slug' => 'canon-ef-50mm',
+                'description' => 'Lensa fix portrait aperture besar f/1.8 untuk efek bokeh lembut dan performa optimal di kondisi minim cahaya.',
+                'price_per_day' => 50000,
+                'stock' => 3,
+                'condition' => 'baik',
+                'image' => 'canon-ef-50mm.jpg',
+                'is_active' => true,
+            ],
+            [
+                'category_id' => 2,
+                'name' => 'Sony FE 24-70mm f/2.8 GM',
+                'slug' => 'sony-fe-24-70mm-f2-8-gm',
+                'description' => 'Lensa zoom standar profesional G Master bukaan konstan f/2.8 untuk portrait, lanskap, dan liputan komersial.',
+                'price_per_day' => 125000,
+                'stock' => 2,
+                'condition' => 'sangat baik',
+                'image' => 'sony-fe-24-70mm-f2-8-gm.png',
+                'is_active' => true,
+            ],
+            [
+                'category_id' => 2,
+                'name' => 'Canon EF-S 10-18mm f/4.5-5.6 IS STM',
+                'slug' => 'canon-ef-s-10-18mm',
+                'description' => 'Lensa ultra-wide angle fleksibel dengan Image Stabilizer untuk arsitektur, lanskap luas, dan ruang sempit.',
+                'price_per_day' => 65000,
+                'stock' => 3,
+                'condition' => 'baik',
+                'image' => 'canon-ef-s-10-18mm.png',
+                'is_active' => true,
+            ],
+            [
+                'category_id' => 2,
+                'name' => 'Filter Lensa ND Variabel',
+                'slug' => 'filter-nd-variabel',
+                'description' => 'Filter neutral density adjustable (ND2-ND400) multi-coating untuk kontrol pencahayaan sinematik.',
+                'price_per_day' => 25000,
+                'stock' => 5,
+                'condition' => 'sangat baik',
+                'image' => 'filter-nd-variabel.png',
+                'is_active' => true,
+            ],
+
+            // -----------------------------
+            // Kategori 3: PENCAHAYAAN
+            // -----------------------------
+            [
+                'category_id' => 3,
+                'name' => 'LED Video Light Portable',
+                'slug' => 'led-video-light',
+                'description' => 'Lampu LED bi-color portabel isi ulang dengan temperatur warna 3200K-5600K untuk video mobile & on-the-go.',
+                'price_per_day' => 35000,
+                'stock' => 4,
+                'condition' => 'baik',
+                'image' => 'led-video-light.jpg',
+                'is_active' => true,
+            ],
+            [
+                'category_id' => 3,
+                'name' => 'Godox SL-60W Video Light',
+                'slug' => 'godox-sl-60w',
+                'description' => 'Continuous LED video light 5600K daylight-balanced dengan Bowens mount untuk podcast, wawancara, dan studio.',
+                'price_per_day' => 70000,
+                'stock' => 3,
+                'condition' => 'sangat baik',
+                'image' => 'godox-sl-60w.png',
+                'is_active' => true,
+            ],
+            [
+                'category_id' => 3,
+                'name' => 'Godox Octabox',
+                'slug' => 'godox-octabox',
+                'description' => 'Softbox octagonal 95cm Bowens mount dengan grid sarang lebah untuk pencahayaan lembut berkarakter bundar.',
+                'price_per_day' => 35000,
+                'stock' => 4,
+                'condition' => 'sangat baik',
+                'image' => 'godox-octabox.png',
+                'is_active' => true,
+            ],
+            [
+                'category_id' => 3,
+                'name' => 'Godox TT685 II',
+                'slug' => 'godox-tt685-ii',
+                'description' => 'Flash speedlite TTL dengan radio receiver nirkabel Godox 2.4G X-system, cocok untuk dokumentasi event & wedding.',
+                'price_per_day' => 55000,
+                'stock' => 3,
+                'condition' => 'sangat baik',
+                'image' => 'godox-tt685-ii.png',
+                'is_active' => true,
+            ],
+            [
+                'category_id' => 3,
+                'name' => 'Softbox Lighting Kit',
+                'slug' => 'softbox-lighting-kit',
+                'description' => 'Paket 2 set continuous softbox lengkap dengan tripod stand dan lampu bohlam fotografi 5500K.',
+                'price_per_day' => 60000,
+                'stock' => 3,
+                'condition' => 'baik',
+                'image' => 'softbox-lighting-kit.png',
+                'is_active' => true,
+            ],
+            [
+                'category_id' => 3,
+                'name' => 'Reflektor 5-in-1',
+                'slug' => 'reflektor-5-in-1',
+                'description' => 'Reflektor lipat bulat multi-panel (Silver, Gold, White, Black, Translucent) untuk pengarah dan pengisi cahaya.',
+                'price_per_day' => 20000,
+                'stock' => 4,
+                'condition' => 'baik',
+                'image' => 'reflektor-5-in-1.png',
+                'is_active' => true,
+            ],
+
+            // -----------------------------
+            // Kategori 4: AKSESORI
+            // -----------------------------
+            [
+                'category_id' => 4,
+                'name' => 'Tripod Kamera Profesional',
+                'slug' => 'tripod-kamera',
+                'description' => 'Tripod paduan aluminium kokoh dengan 3-way pan fluid head dan quick release plate untuk stabilitas foto & video.',
+                'price_per_day' => 25000,
+                'stock' => 5,
+                'condition' => 'baik',
+                'image' => 'tripod-kamera.jpg',
+                'is_active' => true,
+            ],
+            [
+                'category_id' => 4,
+                'name' => 'DJI Ronin-SC Gimbal',
+                'slug' => 'dji-ronin-sc',
+                'description' => 'Gimbal stabilizer 3-axis ringan berbahan magnesium alloy untuk kamera mirrorless dengan motor responsif.',
+                'price_per_day' => 85000,
+                'stock' => 3,
+                'condition' => 'sangat baik',
+                'image' => 'dji-ronin-sc.png',
+                'is_active' => true,
+            ],
+            [
+                'category_id' => 4,
+                'name' => 'DJI RS 3 Mini',
+                'slug' => 'dji-rs-3-mini',
+                'description' => 'Gimbal stabilizer generasi baru berbobot 795g dengan kemampuan native vertical shooting untuk media sosial.',
+                'price_per_day' => 110000,
+                'stock' => 2,
+                'condition' => 'sangat baik',
+                'image' => 'dji-rs-3-mini.png',
+                'is_active' => true,
+            ],
+            [
+                'category_id' => 4,
+                'name' => 'Boya Wireless Microphone System',
+                'slug' => 'boya-wireless-microphone',
+                'description' => 'Sistem mikrofon wireless 2.4GHz dual-channel dengan audio jernih untuk wawancara, livestreaming, dan vlogging.',
+                'price_per_day' => 45000,
+                'stock' => 4,
+                'condition' => 'sangat baik',
+                'image' => 'boya-wireless-microphone.png',
+                'is_active' => true,
+            ],
+            [
+                'category_id' => 4,
+                'name' => 'RØDE VideoMic GO II',
+                'slug' => 'rode-videomic-go-ii',
+                'description' => 'Mikrofon shotgun directional ultra-ringan dengan mounting shockmount Rycote Lyre dan output USB/3.5mm.',
+                'price_per_day' => 50000,
+                'stock' => 3,
+                'condition' => 'sangat baik',
+                'image' => 'rode-videomic-go-ii.png',
+                'is_active' => true,
+            ],
+            [
+                'category_id' => 4,
+                'name' => 'FEELWORLD Field Monitor',
+                'slug' => 'feelworld-field-monitor',
+                'description' => 'Monitor eksternal 5.5 inci Full HD 4K HDMI dengan fitur waveform, false color, dan focus peaking.',
+                'price_per_day' => 75000,
+                'stock' => 2,
+                'condition' => 'sangat baik',
+                'image' => 'feelworld-field-monitor.png',
+                'is_active' => true,
+            ],
+            [
+                'category_id' => 4,
+                'name' => 'Camera Slider',
+                'slug' => 'camera-slider',
+                'description' => 'Rel slider kamera presisi smooth bearing untuk pengambilan gambar tracking sinematik horizontal dan vertikal.',
+                'price_per_day' => 45000,
+                'stock' => 3,
+                'condition' => 'baik',
+                'image' => 'camera-slider.png',
+                'is_active' => true,
+            ],
+            [
+                'category_id' => 4,
+                'name' => 'Backdrop Studio',
+                'slug' => 'backdrop-studio',
+                'description' => 'Stand background studio portabel lengkap dengan kain layar polos (Putih, Hitam, Hijau Greenscreen).',
+                'price_per_day' => 40000,
+                'stock' => 3,
+                'condition' => 'baik',
+                'image' => 'backdrop-studio.png',
+                'is_active' => true,
+            ],
+            [
+                'category_id' => 4,
+                'name' => 'Baterai Cadangan dan Charger',
+                'slug' => 'baterai-cadangan-charger',
+                'description' => 'Paket 2 baterai rechargeable cadangan beserta dual slot fast charger untuk ketahanan produksi seharian.',
+                'price_per_day' => 25000,
+                'stock' => 6,
+                'condition' => 'sangat baik',
+                'image' => 'baterai-cadangan-charger.png',
+                'is_active' => true,
+            ],
+            [
+                'category_id' => 4,
+                'name' => 'Hard Case Kamera',
+                'slug' => 'hard-case-kamera',
+                'description' => 'Koper pelindung gear tahan air (IP67) dan tahan banting dengan busa customisable pick & pluck foam.',
+                'price_per_day' => 35000,
+                'stock' => 4,
+                'condition' => 'sangat baik',
+                'image' => 'hard-case-kamera.png',
+                'is_active' => true,
+            ],
+            [
+                'category_id' => 4,
+                'name' => 'SanDisk Extreme PRO SDXC',
+                'slug' => 'sandisk-extreme-pro',
+                'description' => 'Kartu memori SDXC 128GB kecepatan baca hingga 200MB/s V30 C10 UHS-I untuk rekam video 4K tanpa hambatan.',
+                'price_per_day' => 20000,
+                'stock' => 8,
+                'condition' => 'sangat baik',
+                'image' => 'sandisk-extreme-pro.png',
+                'is_active' => true,
+            ],
+        ];
+
+        foreach ($products as $product) {
+            Product::updateOrCreate(
+                ['slug' => $product['slug']],
+                $product
+            );
+        }
+    }
+}
