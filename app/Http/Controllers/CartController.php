@@ -95,6 +95,10 @@ class CartController extends Controller
      */
     public function add(Request $request): RedirectResponse
     {
+        if (Auth::check() && Auth::user()->isAdmin()) {
+            return back()->with('error', 'Akun administrator hanya digunakan untuk pengelolaan operasional. Untuk melakukan penyewaan barang, silakan gunakan akun pelanggan.');
+        }
+
         $validated = $request->validate([
             'product_id' => ['required', 'exists:products,id'],
             'quantity' => ['required', 'integer', 'min:1'],
@@ -142,6 +146,10 @@ class CartController extends Controller
      */
     public function update(Request $request): RedirectResponse
     {
+        if (Auth::check() && Auth::user()->isAdmin()) {
+            return back()->with('error', 'Akun administrator hanya digunakan untuk pengelolaan operasional. Untuk melakukan penyewaan barang, silakan gunakan akun pelanggan.');
+        }
+
         $validated = $request->validate([
             'items' => ['required', 'array'],
             'items.*.product_id' => ['required', 'exists:products,id'],
@@ -209,6 +217,11 @@ class CartController extends Controller
         if (! Auth::check()) {
             return redirect()->route('login')
                 ->with('error', 'Silakan masuk ke akun Anda terlebih dahulu untuk menyelesaikan pesanan sewa.');
+        }
+
+        if (Auth::user()->isAdmin()) {
+            return redirect()->route('products.index')
+                ->with('error', 'Akun administrator hanya digunakan untuk pengelolaan operasional. Untuk melakukan penyewaan barang, silakan gunakan akun pelanggan.');
         }
 
         $cart = session()->get('cart', []);

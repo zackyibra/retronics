@@ -134,6 +134,7 @@ class AuthController extends Controller
             'phone' => ['required', 'string', 'max:20'],
             'address' => ['nullable', 'string', 'max:500'],
             'password' => ['required', 'confirmed', Password::defaults()],
+            'agree_terms' => ['required', 'accepted'],
         ], [
             'name.required' => 'Nama lengkap wajib diisi.',
             'email.required' => 'Email wajib diisi.',
@@ -141,6 +142,8 @@ class AuthController extends Controller
             'phone.required' => 'Nomor WhatsApp/HP wajib diisi.',
             'password.required' => 'Kata sandi wajib diisi.',
             'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
+            'agree_terms.accepted' => 'Anda wajib menyetujui Syarat dan Ketentuan serta Kebijakan Privasi Retronics untuk mendaftar akun.',
+            'agree_terms.required' => 'Anda wajib menyetujui Syarat dan Ketentuan serta Kebijakan Privasi Retronics untuk mendaftar akun.',
         ]);
 
         $user = User::create([
@@ -150,6 +153,8 @@ class AuthController extends Controller
             'address' => $validated['address'] ?? null,
             'role' => 'customer',
             'password' => Hash::make($validated['password']),
+            'terms_agreed_at' => now(),
+            'terms_version' => 'v1.0-2026',
         ]);
 
         Auth::login($user);

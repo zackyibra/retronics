@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Administrator | Retronics</title>
+
+    <!-- Favicon / Logo Ikon Retronics -->
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.png') }}">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
@@ -28,18 +33,16 @@
         }
     </script>
 </head>
-<body class="bg-slate-900 text-slate-100 antialiased min-h-screen flex items-center justify-center p-4">
+<body class="bg-[#0b1320] text-slate-100 antialiased min-h-screen flex items-center justify-center p-4">
 
     <div class="max-w-md w-full">
         <!-- Logo -->
         <div class="text-center mb-8">
             <a href="{{ route('home') }}" class="inline-flex items-center gap-3">
-                <div class="w-12 h-12 rounded-2xl bg-brand-600 text-white flex items-center justify-center text-2xl shadow-lg shadow-brand-500/30">
-                    📷
-                </div>
+                <img src="{{ asset('images/logo.jpg') }}" alt="Logo Retronics" class="w-12 h-12 object-contain rounded-2xl border border-slate-700 bg-white shadow-lg shadow-brand-500/30">
                 <div class="text-left">
-                    <span class="font-display text-2xl font-bold tracking-tight text-white block">Retronics</span>
-                    <span class="text-[10px] uppercase tracking-widest font-semibold text-amber-400">Admin Operations Portal</span>
+                    <span class="font-display text-2xl font-bold tracking-tight text-white block">retronics</span>
+                    <span class="text-[10px] uppercase tracking-widest font-semibold text-slate-400">Backoffice Administrasi</span>
                 </div>
             </a>
         </div>
@@ -93,7 +96,7 @@
                            value="{{ old('email') }}"
                            required
                            autofocus
-                           placeholder="admin@retronics.test"
+                           placeholder="nama@domain.com"
                            class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition">
                 </div>
 
@@ -124,16 +127,6 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                 </button>
             </form>
-
-            @if (app()->isLocal())
-                <div class="mt-6 pt-5 border-t border-slate-700 text-center">
-                    <button type="button"
-                            onclick="document.getElementById('email').value='admin@retronics.test'; document.getElementById('password').value='password123';"
-                            class="text-xs text-slate-400 hover:text-amber-400 transition underline">
-                        Isi Otomatis Kredensial Admin Lokal (Dev Mode)
-                    </button>
-                </div>
-            @endif
         </div>
 
         <div class="text-center mt-6 text-xs text-slate-400">

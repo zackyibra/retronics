@@ -1,393 +1,437 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $product->name }} | Detail Barang Retronics</title>
-    <meta name="description" content="Detail dan spesifikasi sewa {{ $product->name }} di Retronics. Kondisi {{ $product->condition }}, harga Rp{{ number_format($product->price_per_day, 0, ',', '.') }}/hari.">
+@extends('layouts.app')
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-                        display: ['"Space Grotesk"', 'sans-serif'],
-                    },
-                    colors: {
-                        brand: {
-                            50: '#eff6ff',
-                            100: '#dbeafe',
-                            500: '#2563eb',
-                            600: '#1d4ed8',
-                            700: '#1e40af',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-</head>
-<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col justify-between">
+@section('title', $product->name . ' | Rental Kamera Retronics')
+@section('meta_description', 'Sewa ' . $product->name . ' di Retronics Gunung Putri, Bogor. Kondisi ' . $product->condition . ', harga Rp' . number_format($product->price_per_day, 0, ',', '.') . '/hari. Sensor bersih, terkalibrasi, dan siap pakai.')
 
-    <!-- Navbar -->
-    <header class="bg-white border-b border-slate-200/90 sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-20">
-                <a href="{{ route('home') }}" class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-brand-600 text-white flex items-center justify-center font-bold text-xl shadow-md">
-                        📷
-                    </div>
-                    <div>
-                        <span class="font-display text-2xl font-bold tracking-tight text-slate-900 block">Retronics</span>
-                        <span class="text-[10px] uppercase tracking-widest font-semibold text-slate-500 -mt-1 block">Camera Rental</span>
-                    </div>
-                </a>
+@section('content')
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow pb-24 lg:pb-12">
 
-                <div class="flex items-center gap-3 text-xs font-semibold">
-                    <a href="{{ route('products.index') }}" class="text-slate-600 hover:text-brand-600 transition flex items-center gap-1">
-                        ← Katalog
-                    </a>
+    <!-- Breadcrumb -->
+    <x-breadcrumb :items="[
+        ['label' => 'Katalog Gear', 'url' => route('products.index')],
+        ['label' => $product->category->name ?? 'Kategori', 'url' => route('products.index', ['category' => $product->category->name ?? ''])],
+        ['label' => $product->name, 'url' => '']
+    ]" />
 
-                    <a href="{{ route('cart.index') }}" class="relative p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition flex items-center gap-1.5" title="Keranjang">
-                        <span>🛒</span>
-                        <span class="font-bold hidden sm:inline">Keranjang</span>
-                        @php
-                            $cartCount = array_sum(array_column(session('cart', []), 'quantity'));
-                        @endphp
-                        @if ($cartCount > 0)
-                            <span class="w-4 h-4 rounded-full bg-brand-600 text-white text-[9px] flex items-center justify-center font-bold">
-                                {{ $cartCount }}
-                            </span>
-                        @endif
-                    </a>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-                    @auth
-                        <a href="{{ route('account.index') }}" class="px-3 py-1.5 rounded-xl bg-blue-50 text-brand-600 font-bold">
-                            Akun Saya
-                        </a>
-                    @else
-                        <a href="{{ route('login') }}" class="px-3 py-1.5 rounded-xl bg-brand-600 text-white font-bold">
-                            Masuk
-                        </a>
-                    @endauth
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full flex-grow">
-
-        <!-- Breadcrumb -->
-        <nav class="flex items-center gap-2 text-xs text-slate-500 mb-6">
-            <a href="{{ route('home') }}" class="hover:text-brand-600">Beranda</a>
-            <span>/</span>
-            <a href="{{ route('products.index') }}" class="hover:text-brand-600">Katalog</a>
-            <span>/</span>
-            <span class="text-slate-900 font-semibold">{{ $product->name }}</span>
-        </nav>
-
-        @if (session('success'))
-            <div class="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm flex items-center justify-between">
-                <span>✓ {{ session('success') }}</span>
-                <button type="button" onclick="this.parentElement.remove()" class="text-emerald-600 hover:text-emerald-900">✕</button>
-            </div>
-        @endif
-
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-
-            <!-- Left: Product Image & Badges (7 cols) -->
-            <div class="lg:col-span-7 bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
-                <div class="bg-gradient-to-b from-slate-50 to-blue-50/50 rounded-2xl p-8 h-80 sm:h-96 flex items-center justify-center relative overflow-hidden mb-6">
-                    <span class="absolute top-4 left-4 text-xs font-bold px-3 py-1 rounded-full bg-white text-brand-700 shadow-sm border border-slate-100">
-                        {{ $product->category->name }}
+        <!-- ================================================================= -->
+        <!-- LEFT COLUMN: Product Gallery & Specs (7 Cols)                     -->
+        <!-- ================================================================= -->
+        <div class="lg:col-span-7 space-y-6">
+            
+            <!-- Main Image Card -->
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm relative overflow-hidden">
+                
+                <!-- Category & Stock Badges -->
+                <div class="flex items-center justify-between gap-2 mb-4">
+                    <span class="text-xs font-bold px-3 py-1 rounded-full bg-blue-50 text-brand-700 border border-blue-200/80">
+                        {{ $product->category->name ?? 'Gear' }}
                     </span>
 
                     @if ($product->stock > 0)
-                        <span class="absolute top-4 right-4 text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                            Tersedia ({{ $product->stock }} unit)
+                        <span class="text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span>Unit Siap Sewa ({{ $product->stock }} Unit)</span>
                         </span>
                     @else
-                        <span class="absolute top-4 right-4 text-xs font-bold px-3 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
-                            Habis Tersewa
+                        <span class="text-xs font-bold px-3 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+                            Unit Sedang Disewa
                         </span>
                     @endif
+                </div>
 
+                <!-- Product Image Container -->
+                <div class="bg-slate-50 rounded-2xl p-8 h-80 sm:h-96 flex items-center justify-center relative overflow-hidden border border-slate-100">
                     @if ($product->image)
                         <img src="{{ asset('storage/' . $product->image) }}"
                              alt="{{ $product->name }}"
-                             class="max-h-72 max-w-full object-contain drop-shadow-xl"
+                             class="max-h-72 max-w-full object-contain drop-shadow-xl transition-transform duration-300 hover:scale-105"
                              onerror="this.onerror=null; this.src='{{ asset('images/products/' . $product->image) }}';">
                     @else
                         <div class="text-8xl">📷</div>
                     @endif
                 </div>
 
-                <!-- Product Details Tabs -->
-                <div>
-                    <h2 class="text-xl font-bold text-slate-900 mb-3">Deskripsi & Kelengkapan</h2>
-                    <p class="text-slate-600 text-sm leading-relaxed mb-6">
-                        {{ $product->description ?? 'Peralatan fotografi dan produksi original dengan standar perawatan tinggi. Sensor terkalibrasi bersih, fungsi autofokus akurat, dan baterai terisi penuh siap pakai.' }}
-                    </p>
+                <!-- Trust Guarantee Bar -->
+                <div class="grid grid-cols-3 gap-3 mt-6 pt-6 border-t border-slate-100 text-center">
+                    <div class="p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                        <span class="text-base block mb-0.5">✨</span>
+                        <span class="text-[10px] text-slate-400 block font-bold uppercase tracking-wider">Kondisi Fisik</span>
+                        <span class="text-xs font-bold text-slate-800 capitalize">{{ $product->condition }}</span>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                        <span class="text-base block mb-0.5">🔍</span>
+                        <span class="text-[10px] text-slate-400 block font-bold uppercase tracking-wider">Optik & Sensor</span>
+                        <span class="text-xs font-bold text-emerald-600">100% Bersih</span>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                        <span class="text-base block mb-0.5">🛡️</span>
+                        <span class="text-[10px] text-slate-400 block font-bold uppercase tracking-wider">Jaminan Sewa</span>
+                        <span class="text-xs font-bold text-slate-800">Garansi Unit</span>
+                    </div>
+                </div>
 
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 border-t border-slate-100 pt-6">
-                        <div class="p-3 bg-slate-50 rounded-xl">
-                            <span class="text-[10px] text-slate-400 block font-bold uppercase">Kondisi Alat</span>
-                            <span class="text-xs font-bold text-slate-800">{{ ucfirst($product->condition) }}</span>
+            </div>
+
+            <!-- Description & Included Equipment Box -->
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm space-y-6">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900 font-display mb-2">Deskripsi Produk</h2>
+                    <p class="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                        {{ $product->description ?? 'Peralatan fotografi dan produksi original dengan standar perawatan tinggi di Retronics Gunung Putri, Bogor. Sensor terkalibrasi bersih, fungsi autofokus akurat, dan baterai terisi penuh siap pakai untuk pemotretan komersial maupun personal.' }}
+                    </p>
+                </div>
+
+                <div class="pt-6 border-t border-slate-100">
+                    <h3 class="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                        <span>📦</span>
+                        <span>Kelengkapan Bawaan Sewa (Include):</span>
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-600">
+                        <div class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50">
+                            <span class="text-emerald-600 font-bold">✓</span>
+                            <span>1x Bodi/Unit Utama Kamera</span>
                         </div>
-                        <div class="p-3 bg-slate-50 rounded-xl">
-                            <span class="text-[10px] text-slate-400 block font-bold uppercase">Kategori</span>
-                            <span class="text-xs font-bold text-slate-800">{{ $product->category->name }}</span>
+                        <div class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50">
+                            <span class="text-emerald-600 font-bold">✓</span>
+                            <span>2x Baterai Original Full Charge</span>
                         </div>
-                        <div class="p-3 bg-slate-50 rounded-xl">
-                            <span class="text-[10px] text-slate-400 block font-bold uppercase">Jaminan Unit</span>
-                            <span class="text-xs font-bold text-emerald-600">Garansi Tukar 100%</span>
+                        <div class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50">
+                            <span class="text-emerald-600 font-bold">✓</span>
+                            <span>1x Charger Unit & Kabel Daya</span>
+                        </div>
+                        <div class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50">
+                            <span class="text-emerald-600 font-bold">✓</span>
+                            <span>1x Tas Kamera & Strap Original</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Right: Booking Form & Pricing Action (5 cols) -->
-            <div class="lg:col-span-5 space-y-6">
-                <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm">
-                    <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
-                        <span class="text-xs uppercase font-bold tracking-wider text-slate-400">Tarif Sewa Harian</span>
-                        @auth
-                            <form method="POST" action="{{ route('wishlist.toggle', $product->id) }}">
+            <!-- Customer Reviews Section -->
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm">
+                <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900 font-display flex items-center gap-2">
+                            <span>⭐</span>
+                            <span>Ulasan Penyewa</span>
+                        </h2>
+                        <span class="text-xs text-slate-500">
+                            {{ $reviews->count() }} ulasan terverifikasi
+                        </span>
+                    </div>
+
+                    @if ($reviews->count() > 0)
+                        <div class="text-right">
+                            <span class="text-2xl font-black text-amber-500 font-display">
+                                {{ number_format($averageRating, 1) }}
+                            </span>
+                            <span class="text-xs text-slate-400">/ 5.0</span>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Review Submission Form (if eligible) -->
+                @auth
+                    @if ($canReview)
+                        <div class="bg-blue-50/70 border border-blue-200/80 rounded-2xl p-5 mb-6">
+                            <h3 class="font-bold text-slate-900 text-xs uppercase tracking-wider mb-3">✍️ Tulis Pengalaman Sewa Anda</h3>
+                            <form method="POST" action="{{ route('reviews.store', $product->id) }}">
                                 @csrf
-                                <button type="submit" class="flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-rose-600 transition">
-                                    @if ($isWishlisted)
-                                        <svg class="w-4 h-4 text-rose-500 fill-current" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                                        <span class="text-rose-600">Favorit</span>
-                                    @else
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
-                                        <span>Simpan</span>
-                                    @endif
+                                <div class="mb-3">
+                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Rating Bintang:</label>
+                                    <div class="flex items-center gap-1" id="star-rating">
+                                        @for ($i = 1; $i <= 5; $i++)
+                                            <label class="cursor-pointer">
+                                                <input type="radio" name="rating" value="{{ $i }}" class="sr-only" required>
+                                                <span class="text-2xl text-slate-300 hover:text-amber-400 transition star-btn" data-value="{{ $i }}">★</span>
+                                            </label>
+                                        @endfor
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <textarea name="comment"
+                                              rows="2"
+                                              placeholder="Bagaimana kondisi gear dan layanan selama penyewaan?..."
+                                              required
+                                              class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none"></textarea>
+                                </div>
+
+                                <button type="submit" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs transition shadow-xs">
+                                    Kirim Ulasan
                                 </button>
                             </form>
-                        @endauth
-                    </div>
-
-                    <h1 class="text-2xl font-black text-slate-900 font-display mb-1">{{ $product->name }}</h1>
-                    <div class="text-3xl font-black text-brand-600 font-display mb-6">
-                        Rp{{ number_format($product->price_per_day, 0, ',', '.') }}
-                        <span class="text-xs text-slate-500 font-normal">/ 24 Jam</span>
-                    </div>
-
-                    <!-- Flowchart Step: Masukkan Tanggal dan Durasi Sewa -->
-                    <form method="GET" action="{{ route('rentals.create') }}" class="space-y-4">
-                        <input type="hidden" name="product_id" value="{{ $product->id }}">
-
-                        <div>
-                            <label for="start_date" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                                Tanggal Mulai Sewa
-                            </label>
-                            <input type="date"
-                                   id="start_date"
-                                   name="start_date"
-                                   value="{{ date('Y-m-d', strtotime('+1 day')) }}"
-                                   min="{{ date('Y-m-d') }}"
-                                   required
-                                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
                         </div>
-
-                        <div>
-                            <label for="days" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                                Durasi Sewa
-                            </label>
-                            <select id="days" name="days" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
-                                <option value="1">1 Hari (Tarif Normal)</option>
-                                <option value="2">2 Hari (Hemat 5%)</option>
-                                <option value="3">3 Hari (Hemat 15% - Promo)</option>
-                                <option value="7">7 Hari (Hemat 25% - Mingguan)</option>
-                            </select>
+                    @elseif ($hasReviewed)
+                        <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold mb-6 flex items-center gap-2">
+                            <span>✓</span>
+                            <span>Terima kasih! Anda telah memberikan ulasan untuk peralatan ini.</span>
                         </div>
+                    @endif
+                @endauth
 
-                        @if ($product->stock > 0)
-                            <div class="space-y-2 pt-2">
-                                <button type="submit"
-                                        formaction="{{ route('cart.add') }}"
-                                        formmethod="POST"
-                                        class="w-full py-3 px-4 rounded-xl font-bold text-xs sm:text-sm text-brand-700 bg-brand-50 hover:bg-brand-100 border border-brand-200 transition flex items-center justify-center gap-2">
-                                    <span>🛒 Masukkan ke Keranjang Sewa</span>
-                                </button>
-
-                                <button type="submit"
-                                        class="w-full py-3.5 px-4 rounded-xl font-bold text-sm text-white bg-brand-600 hover:bg-brand-700 shadow-lg shadow-brand-500/25 transition flex items-center justify-center gap-2">
-                                    <span>Lanjut ke Proses Pemesanan (Checkout)</span>
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                                </button>
+                <!-- Reviews List -->
+                @if ($reviews->isEmpty())
+                    <div class="text-center py-8 text-slate-400">
+                        <div class="text-3xl mb-2">💬</div>
+                        <p class="text-xs">Belum ada ulasan untuk perlengkapan ini. Jadilah yang pertama menyewa!</p>
+                    </div>
+                @else
+                    <div class="space-y-3.5">
+                        @foreach ($reviews as $rev)
+                            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-6 h-6 rounded-full bg-brand-100 text-brand-700 font-bold text-[10px] flex items-center justify-center">
+                                            {{ substr($rev->user->name ?? 'U', 0, 1) }}
+                                        </div>
+                                        <span class="text-xs font-bold text-slate-800">{{ $rev->user->name ?? 'Penyewa' }}</span>
+                                    </div>
+                                    <div class="flex items-center text-amber-400 text-xs">
+                                        @for ($s = 1; $s <= 5; $s++)
+                                            <span>{{ $s <= $rev->rating ? '★' : '☆' }}</span>
+                                        @endfor
+                                    </div>
+                                </div>
+                                <p class="text-xs text-slate-600 leading-relaxed">{{ $rev->comment }}</p>
+                                <span class="text-[10px] text-slate-400 block mt-1">{{ $rev->created_at->diffForHumans() }}</span>
                             </div>
-                        @else
-                            <button disabled class="w-full mt-4 py-3.5 px-4 rounded-xl font-bold text-sm text-slate-400 bg-slate-100 cursor-not-allowed">
-                                Stok Saat Ini Sedang Habis
-                            </button>
-                        @endif
-                    </form>
-
-                    <!-- WhatsApp Hotline Option -->
-                    <div class="mt-4 pt-4 border-t border-slate-100 text-center">
-                        <a href="https://wa.me/6281234567890?text=Halo%20Retronics%2C%20saya%20ingin%20tanya%20sewa%20{{ urlencode($product->name) }}"
-                           target="_blank"
-                           class="text-xs font-semibold text-emerald-600 hover:text-emerald-700 flex items-center justify-center gap-1.5">
-                            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.669-.699c.969.586 1.838.88 2.791.88h.005c3.18 0 5.767-2.586 5.768-5.766 0-3.18-2.587-5.766-5.773-5.766zm8.814 5.765c0 4.87-3.953 8.823-8.82 8.823-1.503 0-2.915-.382-4.15-1.047l-4.575 1.199 1.226-4.464c-.75-1.309-1.196-2.825-1.196-4.511 0-4.87 3.953-8.824 8.82-8.824 4.869 0 8.82 3.954 8.82 8.824z"/></svg>
-                            <span>Konsultasi Produk via WhatsApp Admin</span>
-                        </a>
+                        @endforeach
                     </div>
-                </div>
-
-                <!-- Periksa Rincian Jaminan Card -->
-                <div class="bg-blue-50/60 rounded-2xl p-5 border border-blue-100 text-xs text-slate-600 space-y-2">
-                    <div class="flex items-center gap-2 font-bold text-brand-700">
-                        <span>🛡️</span>
-                        <span>Fasilitas Sewa Retronics:</span>
-                    </div>
-                    <ul class="list-disc list-inside space-y-1 text-slate-600 pl-1">
-                        <li>Gratis Tas Kamera & Lens Hood</li>
-                        <li>Baterai Full Charge + Charger Unit</li>
-                        <li>Verifikasi Dokumen Cepat KTP / KTM</li>
-                        <li>Pilihan Ambil di Store atau Kirim ke Lokasi</li>
-                    </ul>
-                </div>
+                @endif
             </div>
 
         </div>
 
-        {{-- ============================================================
-             SECTION ULASAN PELANGGAN
-             ============================================================ --}}
-        <div class="mt-10">
-            <h2 class="text-xl font-black text-slate-900 font-display mb-6 flex items-center gap-2">
-                ⭐ Ulasan Pelanggan
-                @if ($reviews->count() > 0)
-                    <span class="text-sm font-normal text-slate-500">
-                        ({{ $reviews->count() }} ulasan · rata-rata
-                        <span class="font-bold text-amber-500">{{ number_format($averageRating, 1) }}</span>/5)
+        <!-- ================================================================= -->
+        <!-- RIGHT COLUMN: Booking & Rental Calculator Card (5 Cols)           -->
+        <!-- ================================================================= -->
+        <div class="lg:col-span-5 space-y-6">
+            
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm lg:sticky lg:top-28">
+                
+                <!-- Wishlist & Category Header -->
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+                    <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400">
+                        {{ $product->category->name }}
                     </span>
-                @endif
-            </h2>
 
-            {{-- Form Kirim Ulasan --}}
-            @auth
-                @if ($canReview)
-                    <div class="bg-blue-50 border border-blue-100 rounded-2xl p-6 mb-8">
-                        <h3 class="font-bold text-slate-800 mb-4 text-sm">✍️ Tulis Ulasan Anda</h3>
-                        <form method="POST" action="{{ route('reviews.store', $product->id) }}">
+                    @auth
+                        <form method="POST" action="{{ route('wishlist.toggle', $product->id) }}">
                             @csrf
-
-                            {{-- Rating Bintang --}}
-                            <div class="mb-4">
-                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Rating</label>
-                                <div class="flex items-center gap-1" id="star-rating">
-                                    @for ($i = 1; $i <= 5; $i++)
-                                        <label class="cursor-pointer">
-                                            <input type="radio" name="rating" value="{{ $i }}" class="sr-only" required>
-                                            <span class="text-3xl text-slate-300 hover:text-amber-400 transition star-btn" data-value="{{ $i }}">★</span>
-                                        </label>
-                                    @endfor
-                                </div>
-                                @error('rating')
-                                    <p class="text-xs text-rose-600 mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            {{-- Komentar --}}
-                            <div class="mb-4">
-                                <label for="comment" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Komentar</label>
-                                <textarea id="comment"
-                                          name="comment"
-                                          rows="3"
-                                          placeholder="Ceritakan pengalaman Anda menyewa produk ini..."
-                                          class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"
-                                          required>{{ old('comment') }}</textarea>
-                                @error('comment')
-                                    <p class="text-xs text-rose-600 mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <button type="submit"
-                                    class="px-5 py-2.5 rounded-xl bg-brand-600 text-white text-xs font-bold hover:bg-brand-700 transition">
-                                Kirim Ulasan
+                            <button type="submit" class="flex items-center gap-1.5 text-xs font-semibold transition {{ $isWishlisted ? 'text-rose-600' : 'text-slate-400 hover:text-rose-600' }}">
+                                <svg class="w-4 h-4 {{ $isWishlisted ? 'fill-current' : 'fill-none' }}" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                </svg>
+                                <span>{{ $isWishlisted ? 'Favorit' : 'Simpan' }}</span>
                             </button>
                         </form>
-                    </div>
-                @elseif ($hasReviewed)
-                    <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 mb-8 text-sm text-emerald-700 font-semibold">
-                        ✅ Anda sudah memberikan ulasan untuk produk ini.
-                    </div>
-                @endif
-            @else
-                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-8 text-sm text-slate-500">
-                    <a href="{{ route('login') }}" class="text-brand-600 font-bold hover:underline">Masuk</a> untuk memberikan ulasan setelah menyewa produk ini.
+                    @endauth
                 </div>
-            @endauth
 
-            {{-- Daftar Ulasan --}}
-            @if ($reviews->isEmpty())
-                <div class="text-center py-10 text-slate-400">
-                    <div class="text-4xl mb-3">💬</div>
-                    <p class="text-sm">Belum ada ulasan untuk produk ini.</p>
+                <!-- Title & Price per Day -->
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-display mb-2 leading-tight">
+                    {{ $product->name }}
+                </h1>
+
+                <div class="mb-6 flex items-baseline gap-2">
+                    <span class="text-3xl font-black text-brand-600 font-display">
+                        Rp{{ number_format($product->price_per_day, 0, ',', '.') }}
+                    </span>
+                    <span class="text-xs text-slate-400 font-medium">/ 24 Jam</span>
                 </div>
-            @else
+
+                <!-- Booking Options Form -->
                 <div class="space-y-4">
-                    @foreach ($reviews as $review)
-                        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-                            <div class="flex items-start justify-between mb-2">
-                                <div>
-                                    <p class="font-bold text-slate-800 text-sm">{{ $review->user->name }}</p>
-                                    <p class="text-[11px] text-slate-400">{{ $review->created_at->format('d M Y') }}</p>
-                                </div>
-                                <div class="flex items-center gap-0.5">
-                                    @for ($i = 1; $i <= 5; $i++)
-                                        <span class="text-lg {{ $i <= $review->rating ? 'text-amber-400' : 'text-slate-200' }}">★</span>
-                                    @endfor
-                                </div>
-                            </div>
-                            <p class="text-sm text-slate-600 leading-relaxed">{{ $review->comment }}</p>
+                    
+                    <!-- Date Picker -->
+                    <div>
+                        <label for="detail_start_date" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                            Tanggal Mulai Sewa
+                        </label>
+                        <input type="date"
+                               id="detail_start_date"
+                               value="{{ date('Y-m-d') }}"
+                               min="{{ date('Y-m-d') }}"
+                               class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium">
+                    </div>
+
+                    <!-- Duration Selector -->
+                    <div>
+                        <label for="detail_days" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                            Pilih Durasi Sewa
+                        </label>
+                        <select id="detail_days"
+                                class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium">
+                            <option value="1">1 Hari (Tarif Standar)</option>
+                            <option value="2">2 Hari (Hemat 5%)</option>
+                            <option value="3">3 Hari (Hemat 15% - Paling Diminati)</option>
+                            <option value="7">7 Hari (Hemat 25% - Paket Mingguan)</option>
+                        </select>
+                    </div>
+
+                    <!-- Live Cost Simulation Box -->
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/90 text-xs space-y-2">
+                        <div class="flex justify-between text-slate-500">
+                            <span>Subtotal Durasi:</span>
+                            <span class="font-bold text-slate-800" id="detail_subtotal_calc">Rp0</span>
                         </div>
-                    @endforeach
+                        <div class="flex justify-between text-emerald-600 font-semibold" id="detail_discount_row">
+                            <span>Diskon Durasi:</span>
+                            <span id="detail_discount_calc">-Rp0</span>
+                        </div>
+                        <div class="pt-2 border-t border-slate-200 flex justify-between items-baseline">
+                            <span class="font-bold text-slate-700">Estimasi Total:</span>
+                            <span class="text-xl font-black text-brand-600 font-display" id="detail_total_calc">Rp0</span>
+                        </div>
+                    </div>
+
+                    @if (auth()->check() && auth()->user()->isAdmin())
+                        <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 space-y-2 mt-2">
+                            <div class="flex items-center gap-2 font-bold text-xs">
+                                <span>👑 Akun Administrator</span>
+                            </div>
+                            <p class="text-[11px] leading-relaxed text-amber-800">
+                                Anda sedang membuka halaman ini sebagai Administrator. Akun administrator hanya digunakan untuk pengelolaan operasional, bukan untuk melakukan penyewaan barang.
+                            </p>
+                            <div class="pt-1">
+                                <a href="{{ route('admin.products.index') }}" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs transition shadow-xs">
+                                    <span>Kelola Inventaris Barang di Panel Admin ↗</span>
+                                </a>
+                            </div>
+                        </div>
+                    @elseif ($product->stock > 0)
+                        <!-- DUAL ACTIONS: DIRECT BOOKING & ADD TO CART -->
+                        <div class="space-y-2.5 pt-2">
+                            
+                            <!-- 1. Direct Booking Button (⚡ Sewa Sekarang) -->
+                            <button type="button"
+                                    id="btn-direct-booking"
+                                    class="w-full py-3.5 px-4 rounded-xl font-bold text-sm text-white bg-brand-600 hover:bg-brand-700 shadow-lg shadow-brand-500/25 transition flex items-center justify-center gap-2">
+                                <span>⚡ Sewa Sekarang (Direct Checkout)</span>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            </button>
+
+                            <!-- 2. Add To Cart Button -->
+                            <form method="POST" action="{{ route('cart.add') }}" id="form-add-to-cart">
+                                @csrf
+                                <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                <input type="hidden" name="quantity" value="1">
+                                <input type="hidden" name="duration_days" id="cart_duration_input" value="1">
+                                <button type="submit"
+                                        class="w-full py-3 px-4 rounded-xl font-bold text-xs sm:text-sm text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition flex items-center justify-center gap-2">
+                                    <span>🛒 Masukkan ke Keranjang Sewa</span>
+                                </button>
+                            </form>
+
+                        </div>
+                    @else
+                        <div class="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-center text-xs font-bold">
+                            Unit ini sedang tersewa. Silakan hubungi CS untuk cek jadwal ketersediaan.
+                        </div>
+                    @endif
+
+                    <!-- WhatsApp Hotline Option -->
+                    <div class="pt-4 border-t border-slate-100 text-center">
+                        <a href="https://wa.me/6281929513780?text=Halo%20Admin%20Retronics%2C%20saya%20ingin%20tanya%20seputar%20sewa%20{{ urlencode($product->name) }}"
+                           target="_blank"
+                           class="text-xs font-semibold text-emerald-600 hover:text-emerald-700 flex items-center justify-center gap-1.5 transition">
+                            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.669-.699c.969.586 1.838.88 2.791.88h.005c3.18 0 5.767-2.586 5.768-5.766 0-3.18-2.587-5.766-5.773-5.766zm8.814 5.765c0 4.87-3.953 8.823-8.82 8.823-1.503 0-2.915-.382-4.15-1.047l-4.575 1.199 1.226-4.464c-.75-1.309-1.196-2.825-1.196-4.511 0-4.87 3.953-8.824 8.82-8.824 4.869 0 8.82 3.954 8.82 8.824z"/></svg>
+                            <span>Tanya CS WhatsApp Retronics</span>
+                        </a>
+                    </div>
+
                 </div>
-            @endif
+
+            </div>
+
         </div>
 
-    </main>
+    </div>
 
-    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
-        &copy; {{ date('Y') }} Retronics. Rental Perlengkapan Fotografi & Kamera Profesional.
-    </footer>
+    <!-- Related Products Showcase -->
+    @if ($relatedProducts->isNotEmpty())
+        <div class="mt-16 pt-12 border-t border-slate-200">
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 font-display mb-6">
+                Rekomendasi Gear Terkait
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                @foreach ($relatedProducts as $relIndex => $relProd)
+                    <x-product-card :product="$relProd" :index="$relIndex" />
+                @endforeach
+            </div>
+        </div>
+    @endif
 
-    {{-- Script interaktif bintang rating --}}
-    <script>
-        const stars = document.querySelectorAll('.star-btn');
-        stars.forEach((star, index) => {
-            star.addEventListener('click', () => {
-                stars.forEach((s, i) => {
-                    s.classList.toggle('text-amber-400', i <= index);
-                    s.classList.toggle('text-slate-300', i > index);
-                });
+</div>
+
+<!-- ========================================================================= -->
+<!-- STICKY BOTTOM ACTION BAR (MOBILE ONLY — MATCHING DESIGN SCREEN ROW 6)      -->
+<!-- ========================================================================= -->
+@if ($product->stock > 0 && !(auth()->check() && auth()->user()->isAdmin()))
+    <div class="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 p-3 sm:hidden shadow-2xl flex items-center justify-between gap-3">
+        <div>
+            <span class="text-[10px] text-slate-400 block font-medium">Tarif Sewa Harian</span>
+            <span class="text-base font-black text-brand-600 font-display">
+                Rp{{ number_format($product->price_per_day, 0, ',', '.') }}
+            </span>
+        </div>
+
+        <button type="button"
+                onclick="document.getElementById('btn-direct-booking')?.click()"
+                class="px-5 py-2.5 rounded-xl font-bold text-xs text-white bg-brand-600 hover:bg-brand-700 shadow-md shadow-brand-500/30 transition flex items-center gap-1.5">
+            <span>⚡ Sewa Sekarang</span>
+        </button>
+    </div>
+@endif
+
+<!-- Client-side Calculation Script -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const pricePerDay = {{ (int) $product->price_per_day }};
+        const daysSelect = document.getElementById('detail_days');
+        const startDateInput = document.getElementById('detail_start_date');
+        const subtotalCalc = document.getElementById('detail_subtotal_calc');
+        const discountCalc = document.getElementById('detail_discount_calc');
+        const totalCalc = document.getElementById('detail_total_calc');
+        const cartDurationInput = document.getElementById('cart_duration_input');
+        const btnDirectBooking = document.getElementById('btn-direct-booking');
+
+        function recalculate() {
+            if (!daysSelect) return;
+            const days = parseInt(daysSelect.value) || 1;
+            if (cartDurationInput) cartDurationInput.value = days;
+
+            let discountRate = 0;
+            if (days >= 7) discountRate = 0.25;
+            else if (days >= 3) discountRate = 0.15;
+            else if (days >= 2) discountRate = 0.05;
+
+            const gross = pricePerDay * days;
+            const discount = Math.round(gross * discountRate);
+            const net = gross - discount;
+
+            if (subtotalCalc) subtotalCalc.innerText = formatIDR(gross);
+            if (discountCalc) discountCalc.innerText = discount > 0 ? `-${formatIDR(discount)} (${discountRate * 100}%)` : 'Rp0';
+            if (totalCalc) totalCalc.innerText = formatIDR(net);
+        }
+
+        if (daysSelect) {
+            daysSelect.addEventListener('change', recalculate);
+            recalculate();
+        }
+
+        if (btnDirectBooking && startDateInput && daysSelect) {
+            btnDirectBooking.addEventListener('click', function () {
+                const sDate = startDateInput.value;
+                const days = daysSelect.value;
+                const targetUrl = "{{ route('rentals.create') }}?product_id={{ $product->id }}&start_date=" + sDate + "&days=" + days;
+                window.location.href = targetUrl;
             });
-            star.addEventListener('mouseover', () => {
-                stars.forEach((s, i) => {
-                    s.classList.toggle('text-amber-400', i <= index);
-                    s.classList.toggle('text-slate-300', i > index);
-                });
-            });
-        });
+        }
+    });
+</script>
 
-        document.getElementById('star-rating')?.addEventListener('mouseleave', () => {
-            const checked = document.querySelector('input[name="rating"]:checked');
-            const selectedVal = checked ? parseInt(checked.value) : 0;
-            stars.forEach((s, i) => {
-                s.classList.toggle('text-amber-400', i < selectedVal);
-                s.classList.toggle('text-slate-300', i >= selectedVal);
-            });
-        });
-    </script>
-
-</body>
-</html>
+@endsection

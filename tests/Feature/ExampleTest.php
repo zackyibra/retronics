@@ -19,9 +19,9 @@ class ExampleTest extends TestCase
         $response = $this->get('/');
 
         $response->assertStatus(200)
-            ->assertSee('Retronics')
-            ->assertSee('Kalkulator Sewa Interaktif')
-            ->assertSee('Gear Siap Pakai Untuk Produksi');
+            ->assertSee('retronics')
+            ->assertSee('Kalkulator sewa')
+            ->assertSee('Gear andalan, siap untuk idemu');
     }
 
     /**

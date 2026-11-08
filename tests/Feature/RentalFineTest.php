@@ -126,6 +126,43 @@ class RentalFineTest extends TestCase
     }
 
     /**
+     * 2b. Perhitungan denda keterlambatan untuk multi-unit barang (Denda = Unit x Hari x Rp50.000).
+     * Contoh: 2 unit barang terlambat 3 hari = Rp300.000.
+     */
+    public function test_late_fine_calculation_matches_retronics_multi_unit_formula(): void
+    {
+        // Rental ended 3 days ago, with 2 units of gear
+        $endDate = Carbon::today()->subDays(3)->toDateString();
+        $returnedAt = Carbon::today()->toDateString();
+
+        $rental = $this->createInUseRental($endDate, quantity: 2);
+
+        $this->actingAs($this->admin);
+
+        $response = $this->post(route('admin.returns.process', $rental->id), [
+            'item_condition_after' => 'layak_tersedia',
+            'returned_at' => $returnedAt,
+            'admin_notes' => '2 unit terlambat 3 hari.',
+        ]);
+
+        $response->assertSessionHas('success');
+
+        // Formula: 2 unit x 3 hari x Rp50.000 = Rp300.000
+        $expectedAmount = 2 * 3 * 50000;
+
+        $this->assertDatabaseHas('fines', [
+            'rental_id' => $rental->id,
+            'type' => Fine::TYPE_LATE,
+            'days_late' => 3,
+            'amount' => $expectedAmount,
+            'assessed_by' => $this->admin->id,
+        ]);
+
+        $rental->refresh();
+        $this->assertEquals(300000.0, (float) $rental->total_fines);
+    }
+
+    /**
      * 3. Denda kerusakan dapat ditetapkan oleh admin.
      */
     public function test_damage_fine_can_be_assessed_by_admin(): void
@@ -229,9 +266,10 @@ class RentalFineTest extends TestCase
         $response->assertSessionHas('success');
 
         $ratePerDay = (float) config('rental.late_fee_per_day', 50000);
-        $expectedLate = 2 * $ratePerDay; // 100,000
+        // Formula: Jumlah Unit (2) x Hari Terlambat (2) x Rp50.000 = Rp200.000
+        $expectedLate = 2 * 2 * $ratePerDay; // 200,000
         $expectedDamage = 60000 + 90000; // 150,000
-        $expectedTotal = $expectedLate + $expectedDamage; // 250,000
+        $expectedTotal = $expectedLate + $expectedDamage; // 350,000
 
         $rental->refresh();
         $this->assertEquals($expectedTotal, $rental->total_fines);
@@ -374,5 +412,49 @@ class RentalFineTest extends TestCase
             ->assertSee('Denda Kerusakan')
             ->assertSee('Tombol shutter macet')
             ->assertSee('Rp'.number_format($rental->refresh()->total_fines, 0, ',', '.'));
+    }
+
+    /**
+     * 10. Halaman admin pengembalian dan denda dapat dibuka tanpa error kueri.
+     */
+    public function test_admin_can_view_returns_and_fines_index_page(): void
+    {
+        $this->actingAs($this->admin);
+
+        $response = $this->get(route('admin.returns.index'));
+
+        $response->assertStatus(200)
+            ->assertSee('Pengembalian & Denda')
+            ->assertSee('Penyewaan Terlambat')
+            ->assertSee('Denda Belum Dilunasi');
+    }
+
+    /**
+     * 11. Admin dapat menandai denda belum lunas menjadi lunas.
+     */
+    public function test_admin_can_mark_unpaid_fine_as_paid(): void
+    {
+        $rental = $this->createInUseRental(Carbon::today()->toDateString());
+
+        $fine = Fine::create([
+            'rental_id' => $rental->id,
+            'type' => Fine::TYPE_LATE,
+            'amount' => 50000,
+            'is_paid' => false,
+            'assessed_by' => $this->admin->id,
+        ]);
+
+        $this->actingAs($this->admin);
+
+        $response = $this->post(route('admin.returns.pay_fine', $fine->id), [
+            'reference' => 'Tunai di Kasir Toko',
+        ]);
+
+        $response->assertSessionHas('success');
+
+        $fine->refresh();
+        $this->assertTrue($fine->is_paid);
+        $this->assertNotNull($fine->paid_at);
+        $this->assertEquals('Tunai di Kasir Toko', $fine->payment_reference);
     }
 }

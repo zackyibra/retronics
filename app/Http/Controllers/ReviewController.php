@@ -34,6 +34,10 @@ class ReviewController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
+        if ($user->isAdmin()) {
+            return back()->with('error', 'Akun administrator hanya digunakan untuk pengelolaan operasional toko, bukan untuk menulis ulasan penyewa.');
+        }
+
         // Pastikan pelanggan sudah pernah menyewa produk ini dengan status completed
         $completedRental = Rental::where('user_id', $user->id)
             ->where('status', 'completed')

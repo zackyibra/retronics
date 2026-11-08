@@ -46,4 +46,20 @@ class HomeController extends Controller
             'stats'
         ));
     }
+
+    /**
+     * Tampilkan halaman Syarat dan Ketentuan layanan Retronics.
+     */
+    public function terms(): View
+    {
+        return view('pages.terms');
+    }
+
+    /**
+     * Tampilkan halaman Kebijakan Privasi data pengguna Retronics.
+     */
+    public function privacy(): View
+    {
+        return view('pages.privacy');
+    }
 }

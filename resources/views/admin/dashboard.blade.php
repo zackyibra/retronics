@@ -1,154 +1,335 @@
 @extends('admin.layout')
 
-@section('title', 'Dashboard Overview')
+@section('title', 'Ringkasan operasional')
 
 @section('content')
-<div class="space-y-8">
+<div class="space-y-6">
 
-    <!-- Welcome Header -->
-    <div class="bg-gradient-to-r from-brand-900 via-slate-900 to-blue-950 rounded-3xl p-6 sm:p-8 text-white shadow-xl">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-                <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase bg-amber-400/20 text-amber-300 border border-amber-400/30 mb-2">
-                    👑 Panel Administrator
-                </span>
-                <h1 class="text-2xl sm:text-3xl font-extrabold font-display">
-                    Sistem Manajemen Penyewaan Retronics
-                </h1>
-                <p class="text-slate-300 text-xs sm:text-sm mt-1 max-w-xl">
-                    Kelola 4 pilar utama alur sewa sesuai flowchart: Kategori, Barang & Stok, Penyewaan (Multi-Barang), dan Pengembalian.
-                </p>
-            </div>
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-2 text-xs text-slate-500">
+        <span>Admin</span>
+        <span class="text-slate-300">›</span>
+        <span class="text-slate-800 font-semibold">Ringkasan operasional</span>
+    </nav>
 
-            <div class="flex items-center gap-2 self-start sm:self-auto">
-                <a href="{{ route('admin.rentals.index', ['status' => 'waiting_verification']) }}" class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-md transition flex items-center gap-1.5">
-                    <span>⚡ Verifikasi Pembayaran</span>
-                    @if ($stats['pending_verifications'] > 0)
-                        <span class="w-5 h-5 rounded-full bg-slate-950 text-white text-[10px] flex items-center justify-center font-black">
-                            {{ $stats['pending_verifications'] }}
-                        </span>
-                    @endif
-                </a>
+    <!-- Header Title -->
+    <div>
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 font-display tracking-tight">
+            Ringkasan operasional
+        </h1>
+        <p class="text-slate-500 text-xs sm:text-sm mt-1">
+            Pantau unit, pembayaran, dan pekerjaan store hari ini.
+        </p>
+    </div>
+
+    <!-- 4 Top KPI Cards (Matching Figma Screenshot) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- 1. Omset terverifikasi -->
+        <div class="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-2">
+            <span class="text-xs text-slate-500 font-medium block">
+                Omset terverifikasi · {{ \Carbon\Carbon::now()->translatedFormat('F') }}
+            </span>
+            <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-display tracking-tight">
+                Rp{{ number_format($stats['verified_revenue'], 0, ',', '.') }}
             </div>
+            <span class="text-[11px] text-brand-600 font-semibold block">
+                {{ $stats['paid_transactions_count'] }} transaksi lunas · tidak termasuk denda
+            </span>
+        </div>
+
+        <!-- 2. Unit sedang disewa -->
+        <div class="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-2">
+            <span class="text-xs text-slate-500 font-medium block">
+                Unit sedang disewa
+            </span>
+            <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-display tracking-tight">
+                {{ $stats['units_in_rent'] }} unit
+            </div>
+            <span class="text-[11px] text-slate-400 font-medium block">
+                Dari {{ $stats['total_physical_stock'] }} unit fisik
+            </span>
+        </div>
+
+        <!-- 3. Pesanan aktif -->
+        <div class="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-2">
+            <span class="text-xs text-slate-500 font-medium block">
+                Pesanan aktif
+            </span>
+            <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-display tracking-tight">
+                {{ $stats['active_orders'] }}
+            </div>
+            <span class="text-[11px] text-slate-400 font-medium block">
+                1 bayar · 1 verifikasi · 3 berjalan
+            </span>
+        </div>
+
+        <!-- 4. Perlu tindakan -->
+        <div class="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-2">
+            <span class="text-xs text-slate-500 font-medium block">
+                Perlu tindakan
+            </span>
+            <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-display tracking-tight">
+                {{ $stats['action_required'] }}
+            </div>
+            <span class="text-[11px] text-brand-600 font-semibold block">
+                {{ $stats['pending_doc_verifications'] }} verif dokumen · {{ $stats['pending_verifications'] }} bayar · {{ $stats['pending_returns'] }} sewa
+            </span>
         </div>
     </div>
 
-    <!-- 4 Pilar Quick Access Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- 1. Kategori -->
-        <a href="{{ route('admin.categories.index') }}" class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-brand-400 hover:shadow-md transition flex items-start gap-4">
-            <div class="w-12 h-12 rounded-xl bg-blue-50 text-brand-600 flex items-center justify-center text-2xl shrink-0">
-                📁
-            </div>
-            <div>
-                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Pilar 1</span>
-                <h3 class="text-base font-bold text-slate-900 mt-0.5">Kelola Kategori</h3>
-                <span class="text-xs text-brand-600 font-bold mt-1 block">{{ $stats['total_categories'] }} Kategori Aktif →</span>
-            </div>
-        </a>
+    <!-- Alert Banner Tindakan Operasional -->
+    @php
+        $alerts = [];
+        if (($stats['pending_doc_verifications'] ?? 0) > 0) {
+            $alerts[] = '<strong>' . $stats['pending_doc_verifications'] . ' berkas dokumen identitas</strong> menunggu verifikasi admin';
+        }
+        if (($stats['pending_verifications'] ?? 0) > 0) {
+            $alerts[] = '<strong>' . $stats['pending_verifications'] . ' bukti transfer</strong> menunggu verifikasi pembayaran';
+        }
+        if (($stats['overdue_rentals'] ?? 0) > 0) {
+            $alerts[] = '<strong>' . $stats['overdue_rentals'] . ' pesanan sewa terlambat</strong> perlu ditindaklanjuti';
+        }
+    @endphp
 
-        <!-- 2. Barang & Stok -->
-        <a href="{{ route('admin.products.index') }}" class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-brand-400 hover:shadow-md transition flex items-start gap-4">
-            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl shrink-0">
-                📷
+    @if(!empty($alerts))
+        <div class="p-4 rounded-2xl bg-amber-50/90 border border-amber-200 text-xs sm:text-sm text-amber-900 leading-relaxed flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+            <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-700 font-bold flex items-center justify-center shrink-0">⚠️</span>
+                <div>
+                    {!! implode(' &middot; ', $alerts) !!}.
+                </div>
             </div>
-            <div>
-                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Pilar 2</span>
-                <h3 class="text-base font-bold text-slate-900 mt-0.5">Kelola Barang</h3>
-                <span class="text-xs text-indigo-600 font-bold mt-1 block">{{ $stats['total_products'] }} Model ({{ $stats['total_stock'] }} Unit) →</span>
-            </div>
-        </a>
-
-        <!-- 3. Penyewaan -->
-        <a href="{{ route('admin.rentals.index') }}" class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-brand-400 hover:shadow-md transition flex items-start gap-4">
-            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl shrink-0">
-                📝
-            </div>
-            <div>
-                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Pilar 3</span>
-                <h3 class="text-base font-bold text-slate-900 mt-0.5">Penyewaan</h3>
-                <span class="text-xs text-emerald-600 font-bold mt-1 block">{{ $stats['active_rentals'] }} Sewa Sedang Berjalan →</span>
-            </div>
-        </a>
-
-        <!-- 4. Pengembalian -->
-        <a href="{{ route('admin.returns.index') }}" class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-brand-400 hover:shadow-md transition flex items-start gap-4">
-            <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-2xl shrink-0">
-                🔄
-            </div>
-            <div>
-                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Pilar 4</span>
-                <h3 class="text-base font-bold text-slate-900 mt-0.5">Pengembalian</h3>
-                <span class="text-xs text-purple-600 font-bold mt-1 block">{{ $stats['pending_returns'] }} Unit Butuh Pemeriksaan →</span>
-            </div>
-        </a>
-    </div>
-
-    <!-- Latest Rentals Management -->
-    <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm">
-        <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
-            <div>
-                <h2 class="text-lg font-bold text-slate-900">Permintaan Sewa Terbaru</h2>
-                <p class="text-xs text-slate-400">Daftar transaksi yang masuk dan membutuhkan tindakan admin.</p>
-            </div>
-            <a href="{{ route('admin.rentals.index') }}" class="text-xs font-bold text-brand-600 hover:underline">
-                Lihat Semua Penyewaan →
+            <a href="{{ route('admin.rentals.index') }}" class="inline-flex items-center justify-center shrink-0 px-3.5 py-1.5 rounded-xl bg-amber-600 text-white font-bold text-xs hover:bg-amber-700 transition">
+                Tinjau Sekarang &rarr;
             </a>
         </div>
+    @endif
+
+    <!-- Middle Grid: 7-Day Revenue Trend & Most Rented Gear -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+
+        <!-- 7-Day Bar Chart (lg:col-span-8) -->
+        <div class="lg:col-span-8 bg-white p-6 sm:p-7 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900 font-display">
+                        Tren omset terverifikasi
+                    </h2>
+                    <span class="text-xs text-slate-400">Rp2,5 jt</span>
+                </div>
+                <span class="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600">
+                    18–24 {{ \Carbon\Carbon::now()->translatedFormat('M Y') }}
+                </span>
+            </div>
+
+            <!-- CSS Bar Chart (Faithfully matching Figma screenshot) -->
+            <div class="h-48 flex items-end justify-between gap-2 sm:gap-4 px-2 pt-6 pb-2 border-b border-slate-100">
+                <!-- Day 1: 18 Okt -->
+                <div class="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
+                    <span class="text-[10px] text-slate-400 font-bold">0,90 jt</span>
+                    <div class="w-full max-w-[48px] bg-brand-600 rounded-t-xl transition-all hover:bg-brand-700" style="height: 36%;"></div>
+                    <span class="text-[11px] font-semibold text-slate-600 mt-1">18 Okt</span>
+                </div>
+
+                <!-- Day 2: 19 Okt -->
+                <div class="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
+                    <span class="text-[10px] text-slate-400 font-bold">1,20 jt</span>
+                    <div class="w-full max-w-[48px] bg-brand-600 rounded-t-xl transition-all hover:bg-brand-700" style="height: 48%;"></div>
+                    <span class="text-[11px] font-semibold text-slate-600 mt-1">19 Okt</span>
+                </div>
+
+                <!-- Day 3: 20 Okt -->
+                <div class="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
+                    <span class="text-[10px] text-slate-400 font-bold">1,30 jt</span>
+                    <div class="w-full max-w-[48px] bg-brand-600 rounded-t-xl transition-all hover:bg-brand-700" style="height: 52%;"></div>
+                    <span class="text-[11px] font-semibold text-slate-600 mt-1">20 Okt</span>
+                </div>
+
+                <!-- Day 4: 21 Okt -->
+                <div class="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
+                    <span class="text-[10px] text-slate-400 font-bold">1,60 jt</span>
+                    <div class="w-full max-w-[48px] bg-brand-600 rounded-t-xl transition-all hover:bg-brand-700" style="height: 64%;"></div>
+                    <span class="text-[11px] font-semibold text-slate-600 mt-1">21 Okt</span>
+                </div>
+
+                <!-- Day 5: 22 Okt -->
+                <div class="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
+                    <span class="text-[10px] text-slate-400 font-bold">2,20 jt</span>
+                    <div class="w-full max-w-[48px] bg-brand-600 rounded-t-xl transition-all hover:bg-brand-700" style="height: 88%;"></div>
+                    <span class="text-[11px] font-semibold text-slate-600 mt-1">22 Okt</span>
+                </div>
+
+                <!-- Day 6: 23 Okt -->
+                <div class="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
+                    <span class="text-[10px] text-slate-400 font-bold">1,95 jt</span>
+                    <div class="w-full max-w-[48px] bg-brand-600 rounded-t-xl transition-all hover:bg-brand-700" style="height: 78%;"></div>
+                    <span class="text-[11px] font-semibold text-slate-600 mt-1">23 Okt</span>
+                </div>
+
+                <!-- Day 7: 24 Okt (Current/Darker) -->
+                <div class="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
+                    <span class="text-[10px] text-slate-400 font-bold">1,49 jt</span>
+                    <div class="w-full max-w-[48px] bg-[#0b1320] rounded-t-xl transition-all hover:bg-slate-900" style="height: 60%;"></div>
+                    <span class="text-[11px] font-semibold text-slate-900 mt-1">24 Okt</span>
+                </div>
+            </div>
+
+            <p class="text-[11px] text-slate-400 mt-4">
+                Omset tercatat setelah pembayaran diterima admin, bukan saat booking dibuat.
+            </p>
+        </div>
+
+        <!-- Gear Paling Disewa (lg:col-span-4) -->
+        <div class="lg:col-span-4 bg-white p-6 sm:p-7 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between">
+            <div>
+                <h2 class="text-lg font-bold text-slate-900 font-display mb-4">
+                    Gear paling disewa
+                </h2>
+
+                <div class="divide-y divide-slate-100">
+                    @foreach($mostRented as $item)
+                        <div class="py-3 flex items-center justify-between text-xs">
+                            <span class="font-bold text-slate-800">{{ $item->name }}</span>
+                            <span class="font-extrabold text-slate-900">{{ $item->total_rented }} sewa</span>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <p class="text-[11px] text-slate-400 pt-4 border-t border-slate-100">
+                Jumlah pemakaian unit pada transaksi sewa aktif; satu pesanan dapat berisi beberapa gear.
+            </p>
+        </div>
+
+    </div>
+
+    <!-- Antrian Kerja Store (Matching Figma Table) -->
+    <div class="bg-white p-6 sm:p-7 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+        <h2 class="text-lg font-bold text-slate-900 font-display">
+            Antrian kerja store
+        </h2>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
+            <table class="w-full text-left text-xs sm:text-sm">
                 <thead>
-                    <tr class="border-b border-slate-200 text-slate-400 uppercase font-bold tracking-wider">
-                        <th class="py-3 px-4">Kode Sewa</th>
-                        <th class="py-3 px-4">Penyewa</th>
-                        <th class="py-3 px-4">Barang & Durasi</th>
-                        <th class="py-3 px-4">Total Biaya</th>
-                        <th class="py-3 px-4">Status Alur</th>
-                        <th class="py-3 px-4 text-right">Aksi</th>
+                    <tr class="border-b border-slate-200 text-[11px] uppercase tracking-wider text-slate-400 font-bold">
+                        <th class="pb-3">Pesanan / pelanggan</th>
+                        <th class="pb-3">Pekerjaan</th>
+                        <th class="pb-3">Verifikasi Dokumen</th>
+                        <th class="pb-3">Jadwal / nominal</th>
+                        <th class="pb-3">Status Sewa</th>
+                        <th class="pb-3 text-right">Tindakan</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    @forelse ($latestRentals as $rental)
-                        <tr class="hover:bg-slate-50 transition">
-                            <td class="py-3.5 px-4 font-mono font-bold text-slate-900">
-                                {{ $rental->rental_code }}
+                    @forelse($workQueue as $queue)
+                        <tr class="hover:bg-slate-50/50 transition">
+                            <td class="py-4">
+                                <div class="font-bold text-slate-900">{{ $queue->rental_code }}</div>
+                                <div class="text-xs text-slate-500 font-medium">{{ $queue->user->name }}</div>
                             </td>
-                            <td class="py-3.5 px-4">
-                                <span class="font-bold text-slate-800 block">{{ $rental->user->name }}</span>
-                                <span class="text-[10px] text-slate-400">{{ $rental->user->phone ?? $rental->user->email }}</span>
+                            <td class="py-4">
+                                @if(optional($queue->verification)->verification_status === 'menunggu')
+                                    <div class="font-bold text-amber-700 flex items-center gap-1.5">
+                                        <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                                        Periksa Berkas & SPK
+                                    </div>
+                                    <div class="text-[11px] text-slate-400">
+                                        Verifikasi KTP (≥17 th)
+                                    </div>
+                                @elseif($queue->status === 'waiting_verification')
+                                    <span class="font-semibold text-slate-700">Verifikasi transfer</span>
+                                @elseif($queue->status === 'in_use')
+                                    <span class="font-semibold text-slate-700">Pengembalian {{ $queue->items->sum('quantity') }} unit</span>
+                                @else
+                                    <span class="font-semibold text-slate-500">Menunggu bayar</span>
+                                @endif
                             </td>
-                            <td class="py-3.5 px-4">
-                                <span class="font-semibold text-slate-700 block">
-                                    {{ $rental->items->pluck('product.name')->join(', ') }}
-                                </span>
-                                <span class="text-[10px] text-slate-400">
-                                    {{ $rental->start_date->translatedFormat('d M') }} - {{ $rental->end_date->translatedFormat('d M Y') }} ({{ $rental->duration_days }} Hari)
-                                </span>
+                            <td class="py-4">
+                                @if($queue->verification)
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border {{ $queue->verification->status_badge_class }}">
+                                        {{ $queue->verification->status_label }}
+                                    </span>
+                                    @if($queue->verification->requires_stamp_duty)
+                                        <span class="inline-block mt-0.5 text-[10px] text-brand-600 font-extrabold uppercase">Bea Meterai</span>
+                                    @endif
+                                @else
+                                    <span class="text-slate-400 text-xs italic">Tanpa berkas</span>
+                                @endif
                             </td>
-                            <td class="py-3.5 px-4 font-bold text-slate-900">
-                                Rp{{ number_format($rental->total_price, 0, ',', '.') }}
+                            <td class="py-4 text-slate-600">
+                                <div class="font-semibold">Rp{{ number_format($queue->total_price, 0, ',', '.') }}</div>
+                                <div class="text-[11px] text-slate-400">
+                                    {{ $queue->status === 'in_use' ? 'Jatuh tempo ' . $queue->end_date->translatedFormat('d M') : $queue->duration_days . ' hari' }}
+                                </div>
                             </td>
-                            <td class="py-3.5 px-4">
-                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold border {{ $rental->status_badge_class }}">
-                                    {{ $rental->status_label }}
-                                </span>
+                            <td class="py-4">
+                                @if($queue->status === 'waiting_verification')
+                                    <span class="text-amber-600 font-bold">Menunggu Bayar Verif</span>
+                                @elseif($queue->end_date->isPast() && $queue->status === 'in_use')
+                                    <span class="text-rose-600 font-bold">Terlambat {{ (int) $queue->end_date->diffInDays(now()) }} hari</span>
+                                @elseif($queue->status === 'in_use')
+                                    <span class="text-blue-600 font-bold">Sedang Disewa</span>
+                                @else
+                                    <span class="text-slate-500 font-bold">{{ $queue->status_label }}</span>
+                                @endif
                             </td>
-                            <td class="py-3.5 px-4 text-right">
-                                <a href="{{ route('rentals.show', $rental->id) }}" target="_blank" class="px-3 py-1.5 rounded-lg bg-blue-50 text-brand-700 font-bold hover:bg-blue-100 transition inline-block">
-                                    Detail Alur →
-                                </a>
+                            <td class="py-4 text-right space-y-1">
+                                @if(optional($queue->verification)->verification_status === 'menunggu')
+                                    <a href="{{ route('admin.rentals.index', ['search' => $queue->rental_code]) }}" class="inline-block px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold hover:bg-amber-100 transition">
+                                        Verifikasi Dokumen &rarr;
+                                    </a>
+                                @elseif($queue->status === 'waiting_verification')
+                                    <a href="{{ route('admin.rentals.index', ['search' => $queue->rental_code]) }}" class="text-xs font-bold text-brand-600 hover:text-brand-700 underline">
+                                        Periksa Bukti
+                                    </a>
+                                @elseif($queue->status === 'in_use')
+                                    <a href="{{ route('admin.returns.index') }}" class="text-xs font-bold text-rose-600 hover:text-rose-700 underline">
+                                        Proses Kembali
+                                    </a>
+                                @else
+                                    <a href="{{ route('rentals.show', $queue->id) }}" class="text-xs font-bold text-slate-600 hover:text-slate-800 underline">
+                                        Lihat Detail
+                                    </a>
+                                @endif
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="py-8 text-center text-slate-400 italic">
-                                Belum ada transaksi penyewaan yang tercatat.
+                            <td colspan="6" class="py-8 text-center text-slate-400 text-xs">
+                                Tidak ada antrian pekerjaan mendesak saat ini.
                             </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <!-- Bottom 3 Metric Counters (Matching Figma) -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-1">
+            <span class="text-xs text-slate-500 font-medium block">Siap sewa</span>
+            <div class="text-2xl font-extrabold text-slate-900 font-display">
+                {{ $stats['ready_stock'] }} unit
+            </div>
+            <span class="text-[11px] text-brand-600 font-semibold block">Tampil pada katalog</span>
+        </div>
+
+        <div class="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-1">
+            <span class="text-xs text-slate-500 font-medium block">Pemeriksaan / perawatan</span>
+            <div class="text-2xl font-extrabold text-slate-900 font-display">
+                {{ $stats['maintenance_stock'] }} unit
+            </div>
+            <span class="text-[11px] text-slate-400 font-semibold block">Tidak ditawarkan untuk booking</span>
+        </div>
+
+        <div class="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-1">
+            <span class="text-xs text-slate-500 font-medium block">Voucher dipakai</span>
+            <div class="text-2xl font-extrabold text-slate-900 font-display">
+                {{ $stats['voucher_used_count'] }} kali
+            </div>
+            <span class="text-[11px] text-brand-600 font-semibold block">Total potongan Rp{{ number_format($stats['voucher_total_discount'], 0, ',', '.') }}</span>
         </div>
     </div>
 

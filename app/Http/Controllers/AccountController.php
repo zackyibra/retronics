@@ -30,22 +30,36 @@ class AccountController extends Controller
     }
 
     /**
-     * Update user profile (phone, address, ID card number).
+     * Update user profile (name, email, phone, address, ID card number).
      */
     public function updateProfile(Request $request): RedirectResponse
     {
         $user = Auth::user();
 
         $validated = $request->validate([
+            'name' => ['nullable', 'string', 'max:255'],
+            'email' => ['nullable', 'string', 'email', 'max:255', 'unique:users,email,'.$user->id],
             'phone' => ['required', 'string', 'max:20'],
             'address' => ['required', 'string', 'max:500'],
             'id_card_number' => ['nullable', 'string', 'max:50'],
         ], [
             'phone.required' => 'Nomor WhatsApp / telepon wajib diisi.',
-            'address.required' => 'Alamat lengkap wajib diisi.',
+            'address.required' => 'Domisili / alamat lengkap wajib diisi.',
+            'email.unique' => 'Alamat email sudah digunakan akun lain.',
         ]);
 
-        $user->update($validated);
+        if (! empty($validated['name'])) {
+            $user->name = $validated['name'];
+        }
+        if (! empty($validated['email'])) {
+            $user->email = $validated['email'];
+        }
+        $user->phone = $validated['phone'];
+        $user->address = $validated['address'];
+        if (isset($validated['id_card_number'])) {
+            $user->id_card_number = $validated['id_card_number'];
+        }
+        $user->save();
 
         return back()->with('success', 'Data profil Anda berhasil diperbarui.');
     }
@@ -110,6 +124,16 @@ class AccountController extends Controller
         }
 
         $user = Auth::user();
+
+        if ($user->isAdmin()) {
+            $message = 'Akun administrator hanya digunakan untuk pengelolaan operasional toko, bukan untuk wishlist penyewaan.';
+            if ($request->wantsJson()) {
+                return response()->json(['status' => 'forbidden', 'message' => $message], 403);
+            }
+
+            return back()->with('error', $message);
+        }
+
         $existing = Wishlist::where('user_id', $user->id)->where('product_id', $productId)->first();
 
         if ($existing) {

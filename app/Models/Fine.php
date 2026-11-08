@@ -29,7 +29,11 @@ class Fine extends Model
         'days_late',
         'rate_per_day',
         'reason',
+        'photo',
         'assessed_by',
+        'is_paid',
+        'paid_at',
+        'payment_reference',
     ];
 
     /**
@@ -43,6 +47,8 @@ class Fine extends Model
             'amount' => 'decimal:2',
             'days_late' => 'integer',
             'rate_per_day' => 'decimal:2',
+            'is_paid' => 'boolean',
+            'paid_at' => 'datetime',
         ];
     }
 
@@ -96,5 +102,33 @@ class Fine extends Model
     public function isDamage(): bool
     {
         return $this->type === self::TYPE_DAMAGE;
+    }
+
+    /**
+     * Scope query to only unpaid fines.
+     */
+    public function scopeUnpaid($query)
+    {
+        return $query->where('is_paid', false);
+    }
+
+    /**
+     * Scope query to only paid fines.
+     */
+    public function scopePaid($query)
+    {
+        return $query->where('is_paid', true);
+    }
+
+    /**
+     * Mark fine as paid.
+     */
+    public function markAsPaid(?string $reference = null): void
+    {
+        $this->update([
+            'is_paid' => true,
+            'paid_at' => now(),
+            'payment_reference' => $reference,
+        ]);
     }
 }

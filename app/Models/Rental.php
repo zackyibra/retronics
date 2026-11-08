@@ -2,12 +2,18 @@
 
 namespace App\Models;
 
+use Database\Factories\RentalFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Rental extends Model
 {
+    /** @use HasFactory<RentalFactory> */
+    use HasFactory;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -20,6 +26,8 @@ class Rental extends Model
         'end_date',
         'duration_days',
         'total_price',
+        'promo_code',
+        'discount_amount',
         'status',
         'payment_method',
         'payment_proof',
@@ -27,6 +35,7 @@ class Rental extends Model
         'admin_notes',
         'item_condition_after',
         'returned_at',
+        'return_photo',
     ];
 
     /**
@@ -42,6 +51,7 @@ class Rental extends Model
             'returned_at' => 'datetime',
             'duration_days' => 'integer',
             'total_price' => 'decimal:2',
+            'discount_amount' => 'decimal:2',
         ];
     }
 
@@ -67,6 +77,47 @@ class Rental extends Model
     public function fines(): HasMany
     {
         return $this->hasMany(Fine::class);
+    }
+
+    /**
+     * Get the customer verification documents for this rental.
+     */
+    public function verification(): HasOne
+    {
+        return $this->hasOne(RentalVerification::class);
+    }
+
+    /**
+     * Check if rental has approved identity verification.
+     */
+    public function hasApprovedVerification(): bool
+    {
+        return $this->verification !== null
+            && $this->verification->verification_status === RentalVerification::STATUS_DISETUJUI;
+    }
+
+    /**
+     * Get all payment attempts recorded for this rental.
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    /**
+     * Get the latest payment attempt for this rental.
+     */
+    public function latestPayment(): HasOne
+    {
+        return $this->hasOne(Payment::class)->latestOfMany();
+    }
+
+    /**
+     * Get customer reviews linked to this rental.
+     */
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
     }
 
     /**

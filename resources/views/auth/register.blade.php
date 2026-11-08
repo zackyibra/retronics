@@ -1,57 +1,81 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar Akun Baru | Retronics</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-                        display: ['"Space Grotesk"', 'sans-serif'],
-                    },
-                    colors: {
-                        brand: {
-                            500: '#2563eb',
-                            600: '#1d4ed8',
-                            700: '#1e40af',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-</head>
-<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex items-center justify-center p-4">
+@extends('layouts.app')
 
-    <div class="max-w-md w-full">
-        <!-- Logo -->
-        <div class="text-center mb-6">
-            <a href="{{ route('home') }}" class="inline-flex items-center gap-3">
-                <div class="w-12 h-12 rounded-2xl bg-brand-600 text-white flex items-center justify-center text-2xl shadow-lg shadow-brand-500/30">
-                    📷
-                </div>
-                <div class="text-left">
-                    <span class="font-display text-2xl font-bold tracking-tight text-slate-900 block">Retronics</span>
-                    <span class="text-[10px] uppercase tracking-widest font-semibold text-slate-500">Camera Rental Service</span>
-                </div>
-            </a>
+@section('title', 'Daftar Akun Penyewa | Retronics – Rental Fotografi')
+
+@section('content')
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-14">
+
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-2 text-xs text-slate-500 mb-8">
+        <a href="{{ route('home') }}" class="hover:text-brand-600 transition">Beranda</a>
+        <span class="text-slate-300">›</span>
+        <span class="text-slate-800 font-semibold">Daftar</span>
+    </nav>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+
+        <!-- LEFT COLUMN: Gear Setup Photo & Value Props (lg:col-span-6) -->
+        <div class="lg:col-span-6 space-y-6">
+            <div class="relative rounded-3xl overflow-hidden bg-slate-100 border border-slate-200/80 shadow-md aspect-[4/3]">
+                <img src="https://images.unsplash.com/photo-1502920917128-1aa500764cbd?auto=format&fit=crop&w=1200&q=80"
+                     alt="Retronics Studio Gear"
+                     class="w-full h-full object-cover">
+            </div>
+
+            <div class="space-y-4">
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 font-display tracking-tight">
+                    Satu akun untuk setiap rencana produksi.
+                </h2>
+
+                <ul class="space-y-2.5 text-xs sm:text-sm font-semibold text-slate-700">
+                    <li class="flex items-center gap-2.5">
+                        <span class="w-5 h-5 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center font-bold text-xs flex-shrink-0">✓</span>
+                        <span>Booking gear dan gunakan promo</span>
+                    </li>
+                    <li class="flex items-center gap-2.5">
+                        <span class="w-5 h-5 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center font-bold text-xs flex-shrink-0">✓</span>
+                        <span>Unggah bukti transfer manual</span>
+                    </li>
+                    <li class="flex items-center gap-2.5">
+                        <span class="w-5 h-5 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center font-bold text-xs flex-shrink-0">✓</span>
+                        <span>Pantau jadwal dan pengembalian</span>
+                    </li>
+                    <li class="flex items-center gap-2.5">
+                        <span class="w-5 h-5 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center font-bold text-xs flex-shrink-0">✓</span>
+                        <span>Simpan wishlist dan beri ulasan</span>
+                    </li>
+                </ul>
+            </div>
         </div>
 
-        <div class="bg-white rounded-3xl p-8 sm:p-10 border border-slate-200/80 shadow-xl shadow-slate-200/50">
-            <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight font-display mb-2">Buat Akun Penyewa</h1>
-            <p class="text-xs sm:text-sm text-slate-500 mb-6">
-                Daftar sekarang untuk mulai menyewa kamera dan perlengkapan fotografi profesional.
-            </p>
+        <!-- RIGHT COLUMN: Registration Form (lg:col-span-6) -->
+        <div class="lg:col-span-6 max-w-lg mx-auto w-full space-y-6">
+
+            <div class="flex items-center gap-3">
+                <img src="{{ asset('images/logo.jpg') }}" alt="Logo Retronics" class="w-12 h-12 object-contain rounded-2xl border border-slate-200 bg-white shadow-xs">
+                <div>
+                    <span class="font-display font-black text-xl text-slate-900 block leading-none">retronics</span>
+                    <span class="text-[9px] uppercase tracking-widest font-bold text-slate-500 block mt-1">Camera Rental Service</span>
+                </div>
+            </div>
+
+            <div>
+                <span class="inline-block px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider text-brand-600 bg-brand-50 border border-brand-100">
+                    Mulai berkarya bersama Retronics
+                </span>
+                <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 font-display tracking-tight mt-3">
+                    Buat akun penyewa
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-500 mt-2">
+                    Sudah terdaftar?
+                    <a href="{{ route('login') }}" class="font-bold text-brand-600 hover:text-brand-700 underline underline-offset-2">
+                        Masuk ke akunmu ↗
+                    </a>
+                </p>
+            </div>
 
             @if ($errors->any())
-                <div class="mb-5 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-sm">
+                <div class="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-sm">
                     <ul class="list-disc list-inside space-y-1">
                         @foreach ($errors->all() as $err)
                             <li>{{ $err }}</li>
@@ -63,103 +87,121 @@
             <form method="POST" action="{{ route('register') }}" class="space-y-4">
                 @csrf
 
-                <div>
-                    <label for="name" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Nama Lengkap
+                <!-- Nama Lengkap -->
+                <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/50 focus-within:border-brand-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-brand-100 transition">
+                    <label for="name" class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                        Nama lengkap *
                     </label>
                     <input type="text"
                            id="name"
                            name="name"
                            value="{{ old('name') }}"
+                           placeholder="Nama sesuai identitas"
                            required
                            autofocus
-                           placeholder="Contoh: Budi Santoso"
-                           class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition">
+                           class="w-full bg-transparent text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none">
                 </div>
 
-                <div>
-                    <label for="email" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Alamat Email
-                    </label>
-                    <input type="email"
-                           id="email"
-                           name="email"
-                           value="{{ old('email') }}"
-                           required
-                           placeholder="nama@email.com"
-                           class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition">
+                <!-- Email & WhatsApp Row -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/50 focus-within:border-brand-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-brand-100 transition">
+                        <label for="email" class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                            Email *
+                        </label>
+                        <input type="email"
+                               id="email"
+                               name="email"
+                               value="{{ old('email') }}"
+                               placeholder="nama@email.com"
+                               required
+                               class="w-full bg-transparent text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none">
+                    </div>
+
+                    <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/50 focus-within:border-brand-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-brand-100 transition">
+                        <label for="phone" class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                            WhatsApp aktif *
+                        </label>
+                        <input type="text"
+                               id="phone"
+                               name="phone"
+                               value="{{ old('phone') }}"
+                               placeholder="Nomor yang dapat dihubungi"
+                               required
+                               class="w-full bg-transparent text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none">
+                    </div>
                 </div>
 
-                <div>
-                    <label for="phone" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Nomor WhatsApp / HP
-                    </label>
-                    <input type="text"
-                           id="phone"
-                           name="phone"
-                           value="{{ old('phone') }}"
-                           required
-                           placeholder="081234567890"
-                           class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition">
-                </div>
-
-                <div>
-                    <label for="address" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Alamat Domisili (Opsional)
+                <!-- Domisili -->
+                <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/50 focus-within:border-brand-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-brand-100 transition">
+                    <label for="address" class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                        Domisili *
                     </label>
                     <input type="text"
                            id="address"
                            name="address"
-                           value="{{ old('address') }}"
-                           placeholder="Kota / Alamat lengkap"
-                           class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition">
+                           value="{{ old('address', 'Gunung Putri, Bogor') }}"
+                           placeholder="Kota / wilayah tempat tinggal"
+                           required
+                           class="w-full bg-transparent text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none">
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label for="password" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                            Kata Sandi
+                <!-- Password Row -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/50 focus-within:border-brand-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-brand-100 transition">
+                        <label for="password" class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                            Password *
                         </label>
                         <input type="password"
                                id="password"
                                name="password"
+                               placeholder="Minimal 8 karakter"
                                required
-                               placeholder="••••••••"
-                               class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition">
+                               class="w-full bg-transparent text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none">
                     </div>
 
-                    <div>
-                        <label for="password_confirmation" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                            Ulangi Sandi
+                    <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/50 focus-within:border-brand-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-brand-100 transition">
+                        <label for="password_confirmation" class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                            Konfirmasi password *
                         </label>
                         <input type="password"
                                id="password_confirmation"
                                name="password_confirmation"
+                               placeholder="Ulangi password"
                                required
-                               placeholder="••••••••"
-                               class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition">
+                               class="w-full bg-transparent text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none">
                     </div>
                 </div>
 
+                <!-- Terms Checkbox -->
+                <div class="pt-1">
+                    <label class="flex items-start gap-2.5 text-xs text-slate-600 cursor-pointer">
+                        <input type="checkbox"
+                               name="agree_terms"
+                               value="1"
+                               {{ old('agree_terms') ? 'checked' : '' }}
+                               required
+                               class="w-4 h-4 mt-0.5 text-brand-600 rounded border-slate-300 focus:ring-brand-500">
+                        <span class="leading-relaxed">
+                            Saya telah membaca dan menyetujui <a href="{{ route('terms') }}" target="_blank" class="font-bold text-brand-600 hover:text-brand-700 underline underline-offset-2">Syarat dan Ketentuan</a> serta <a href="{{ route('privacy') }}" target="_blank" class="font-bold text-brand-600 hover:text-brand-700 underline underline-offset-2">Kebijakan Privasi</a> Retronics.
+                        </span>
+                    </label>
+                </div>
+
+                <!-- Submit Button -->
                 <button type="submit"
-                        class="w-full mt-4 py-3.5 px-4 rounded-xl font-bold text-sm text-white bg-brand-600 hover:bg-brand-700 shadow-lg shadow-brand-500/25 transition duration-200 flex items-center justify-center gap-2">
-                    <span>Daftar Akun Sekarang</span>
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        class="w-full py-4 px-6 rounded-2xl font-bold text-sm text-white bg-brand-600 hover:bg-brand-700 shadow-lg shadow-brand-500/25 transition">
+                    Daftar Akun
                 </button>
+
+                <!-- Subtext Banner (Matching Figma) -->
+                <div class="p-3.5 rounded-2xl bg-blue-50/70 border border-blue-100 text-xs text-brand-800 leading-relaxed text-center">
+                    Informasi kontak dipakai untuk koordinasi sewa dan pengembalian, bukan untuk pembayaran otomatis.
+                </div>
             </form>
 
-            <div class="mt-6 text-center text-xs text-slate-500">
-                Sudah memiliki akun?
-                <a href="{{ route('login') }}" class="font-bold text-brand-600 hover:underline">
-                    Masuk di sini
-                </a>
-            </div>
         </div>
 
-        <div class="text-center mt-6 text-xs text-slate-400">
-            <a href="{{ route('home') }}" class="hover:text-slate-600 transition">← Kembali ke Halaman Utama</a>
-        </div>
     </div>
 
-</body>
-</html>
+</div>
+@endsection

@@ -5,9 +5,12 @@ namespace Tests\Feature;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Rental;
+use App\Models\RentalVerification;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class RetronicsFlowTest extends TestCase
@@ -17,7 +20,28 @@ class RetronicsFlowTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        Storage::fake('local');
         $this->seed();
+    }
+
+    /**
+     * Helper: builds the verification payload required by the new rental verification system.
+     *
+     * @return array<string, mixed>
+     */
+    private function verificationPayload(): array
+    {
+        return [
+            'birth_date' => '2000-01-01',
+            'id_card_number' => '3578012345670001',
+            'id_card_file' => UploadedFile::fake()->create('ktp.jpg', 500, 'image/jpeg'),
+            'rental_purpose' => 'Produksi konten media sosial',
+            'emergency_contact_name' => 'Agus Wijaya',
+            'emergency_contact_phone' => '081234567890',
+            'emergency_contact_relation' => 'Saudara',
+            'signature_data' => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+            'agree_terms' => 1,
+        ];
     }
 
     /**
@@ -28,8 +52,8 @@ class RetronicsFlowTest extends TestCase
         // 1. Buka Website Retronics -> Halaman Beranda
         $response = $this->get(route('home'));
         $response->assertStatus(200)
-            ->assertSee('Retronics')
-            ->assertSee('Kalkulator Sewa Interaktif');
+            ->assertSee('retronics')
+            ->assertSee('Kalkulator sewa');
 
         // 2. Jelajahi Menu -> Lihat Katalog Barang
         $response = $this->get(route('products.index'));
@@ -43,7 +67,7 @@ class RetronicsFlowTest extends TestCase
         $response = $this->get(route('products.show', $product->slug));
         $response->assertStatus(200)
             ->assertSee($product->name)
-            ->assertSee('Lanjut ke Proses Pemesanan');
+            ->assertSee('Sewa Sekarang');
     }
 
     /**
@@ -53,7 +77,7 @@ class RetronicsFlowTest extends TestCase
     {
         // Cek halaman login
         $response = $this->get(route('login'));
-        $response->assertStatus(200)->assertSee('Selamat Datang Kembali');
+        $response->assertStatus(200)->assertSee('Selamat datang kembali');
 
         // Login dengan data yang salah
         $response = $this->post(route('login'), [
@@ -83,6 +107,7 @@ class RetronicsFlowTest extends TestCase
             'address' => 'Studio Kreatif Jakarta',
             'password' => 'password123',
             'password_confirmation' => 'password123',
+            'agree_terms' => '1',
         ]);
         $response->assertRedirect(route('account.index'));
         $this->assertDatabaseHas('users', ['email' => 'kreator@example.com']);
@@ -101,10 +126,10 @@ class RetronicsFlowTest extends TestCase
 
         // Buka form booking
         $response = $this->get(route('rentals.create', ['product_id' => $product->id]));
-        $response->assertStatus(200)->assertSee('Konfirmasi Permintaan Sewa Barang');
+        $response->assertStatus(200)->assertSee('Konfirmasi Pemesanan');
 
-        // Lakukan pemesanan
-        $response = $this->post(route('rentals.store'), [
+        // Lakukan pemesanan (dengan field verifikasi baru)
+        $response = $this->post(route('rentals.store'), array_merge([
             'start_date' => Carbon::tomorrow()->toDateString(),
             'duration_days' => 3,
             'products' => [
@@ -114,7 +139,7 @@ class RetronicsFlowTest extends TestCase
                 ],
             ],
             'notes' => 'Tolong siapkan baterai full charge.',
-        ]);
+        ], $this->verificationPayload()));
 
         $rental = Rental::where('user_id', $user->id)->latest()->first();
         $this->assertNotNull($rental);
@@ -142,7 +167,7 @@ class RetronicsFlowTest extends TestCase
 
         // Dashboard Admin
         $response = $this->get(route('admin.dashboard'));
-        $response->assertStatus(200)->assertSee('Panel Administrator');
+        $response->assertStatus(200)->assertSee('Ringkasan operasional');
 
         // Pilar 1: Tambah Kategori
         $response = $this->post(route('admin.categories.store'), [
@@ -175,6 +200,18 @@ class RetronicsFlowTest extends TestCase
             'duration_days' => 2,
             'total_price' => 300000,
             'status' => 'waiting_verification',
+        ]);
+
+        RentalVerification::create([
+            'rental_id' => $rental->id,
+            'user_id' => $customer->id,
+            'id_card_number' => '3578012345670001',
+            'rental_purpose' => 'Test Flow Admin',
+            'emergency_contact_name' => 'Kontak',
+            'emergency_contact_phone' => '081234567890',
+            'emergency_contact_relation' => 'Kerabat',
+            'signature_data' => 'data:image/png;base64,dummy',
+            'verification_status' => RentalVerification::STATUS_DISETUJUI,
         ]);
 
         $response = $this->post(route('admin.rentals.verify', $rental->id), [
@@ -214,12 +251,12 @@ class RetronicsFlowTest extends TestCase
 
         // 1. Akses Menu Akun
         $response = $this->get(route('account.index'));
-        $response->assertStatus(200)->assertSee('Dashboard Akun & Profil');
+        $response->assertStatus(200)->assertSee('Profil & Password');
 
         // 2. Edit Profil
         $response = $this->post(route('account.profile.update'), [
             'phone' => '081299998888',
-            'address' => 'Jl. Baru No. 99, Surabaya',
+            'address' => 'Jl. Pabuaran No. 99, Gunung Putri, Bogor',
             'id_card_number' => '3578012345670002',
         ]);
         $response->assertSessionHas('success');
@@ -247,7 +284,7 @@ class RetronicsFlowTest extends TestCase
 
         // 4. Riwayat Penyewaan
         $response = $this->get(route('account.rentals'));
-        $response->assertStatus(200)->assertSee('Riwayat &amp; Status Penyewaan', false);
+        $response->assertStatus(200)->assertSee('Riwayat sewa');
     }
 
     /**
@@ -297,7 +334,7 @@ class RetronicsFlowTest extends TestCase
 
         // 1. Buka keranjang saat kosong
         $response = $this->get(route('cart.index'));
-        $response->assertStatus(200)->assertSee('Keranjang Sewa Anda Masih Kosong');
+        $response->assertStatus(200)->assertSee('Keranjang Sewa Masih Kosong');
 
         // 2. Tambah produk ke keranjang
         $response = $this->post(route('cart.add'), [
@@ -313,7 +350,7 @@ class RetronicsFlowTest extends TestCase
         $response = $this->get(route('cart.index'));
         $response->assertStatus(200)
             ->assertSee($product->name)
-            ->assertSee('Ringkasan Biaya Sewa');
+            ->assertSee('Estimasi biaya');
 
         // 3. Update keranjang
         $response = $this->post(route('cart.update'), [
@@ -355,13 +392,13 @@ class RetronicsFlowTest extends TestCase
         // 1. Kelola Pelanggan
         $response = $this->get(route('admin.customers.index'));
         $response->assertStatus(200)
-            ->assertSee('Kelola Data Pelanggan')
+            ->assertSee('Pelanggan')
             ->assertSee('Budi Santoso');
 
         // 2. Laporan Penyewaan
         $response = $this->get(route('admin.reports.index'));
         $response->assertStatus(200)
-            ->assertSee('Laporan & Riwayat Penyewaan');
+            ->assertSee('Laporan bisnis');
 
         // 3. Pengaturan Akun Admin
         $response = $this->get(route('admin.settings.index'));

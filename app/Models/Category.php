@@ -24,4 +24,9 @@ class Category extends Model
     {
         return $this->hasMany(Product::class);
     }
+
+    public function promotions(): HasMany
+    {
+        return $this->hasMany(Promotion::class);
+    }
 }

@@ -1,665 +1,542 @@
-<!DOCTYPE html>
-<html lang="id" class="scroll-smooth">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Retronics - Rental Kamera & Peralatan Fotografi Profesional</title>
-    <meta name="description" content="Sewa kamera DSLR, mirrorless, lensa premium, lighting studio, dan stabilizer di Retronics. Unit siap pakai, sensor bersih, dan proses cepat.">
+@extends('layouts.app')
 
-    <!-- Fonts: Plus Jakarta Sans & Space Grotesk -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+@section('title', 'Sewa Kamera & Peralatan Fotografi Profesional di Gunung Putri, Bogor')
+@section('meta_description', 'Sewa kamera DSLR, mirrorless, lensa premium, lighting studio, dan stabilizer di Retronics Gunung Putri, Kabupaten Bogor. Unit siap pakai, sensor dan optik terkalibrasi bersih, tanpa birokrasi berbelit.')
 
-    <!-- Tailwind CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
-                        display: ['"Space Grotesk"', 'sans-serif'],
-                    },
-                    colors: {
-                        brand: {
-                            50: '#eff6ff',
-                            100: '#dbeafe',
-                            200: '#bfdbfe',
-                            500: '#2563eb',
-                            600: '#1d4ed8',
-                            700: '#1e40af',
-                            800: '#1e3a8a',
-                            900: '#0f172a',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-
-    <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #f8fafc;
-            color: #0f172a;
-        }
-
-        .font-display {
-            font-family: 'Space Grotesk', sans-serif;
-        }
-
-        /* Scroll Reveal Animations */
-        .reveal-on-scroll {
-            opacity: 0;
-            transform: translateY(28px);
-            transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-            will-change: opacity, transform;
-        }
-
-        .reveal-on-scroll.is-revealed {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .delay-100 { transition-delay: 100ms; }
-        .delay-150 { transition-delay: 150ms; }
-        .delay-200 { transition-delay: 200ms; }
-        .delay-250 { transition-delay: 250ms; }
-        .delay-300 { transition-delay: 300ms; }
-        .delay-400 { transition-delay: 400ms; }
-
-        @keyframes progressLine {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-        .animate-progress {
-            animation: progressLine 0.9s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-        }
-
-        /* Viewfinder reticle subtle animation */
-        @keyframes subtlePulse {
-            0%, 100% { opacity: 0.8; }
-            50% { opacity: 0.4; }
-        }
-        .animate-subtle-pulse {
-            animation: subtlePulse 3s ease-in-out infinite;
-        }
-    </style>
-</head>
-<body class="antialiased selection:bg-brand-500 selection:text-white min-h-screen flex flex-col justify-between">
+@section('content')
 
     <!-- ========================================================================= -->
-    <!-- PRELOADER ANIMATION (Animasi Loading Masuk Sebelum Halaman Utama)           -->
+    <!-- 1. HERO SECTION (MATCHING DESIGN SCREENSHOT)                              -->
     <!-- ========================================================================= -->
-    <div id="retronics-loader" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950 text-white transition-opacity duration-600 ease-out">
-        <div class="relative flex items-center justify-center mb-5">
-            <div class="w-20 h-20 rounded-2xl bg-white p-2 shadow-2xl shadow-brand-500/30 flex items-center justify-center overflow-hidden border border-white/20">
-                <img src="{{ asset('images/logo.jpg') }}" alt="Retronics Logo" class="w-full h-full object-contain">
-            </div>
-            <div class="absolute -inset-3 rounded-3xl border border-brand-500/30 animate-ping opacity-60"></div>
-        </div>
-        <span class="font-display font-black text-2xl tracking-tight text-white">Retronics</span>
-        <span class="text-xs text-slate-400 mt-1 font-medium tracking-wide">Menyiapkan Katalog & Peralatan Produksi...</span>
-        <div class="w-36 h-1.5 bg-slate-800 rounded-full mt-4 overflow-hidden relative">
-            <div class="w-full h-full bg-brand-500 rounded-full animate-progress"></div>
-        </div>
-    </div>
-
-    <script>
-        window.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                const loader = document.getElementById('retronics-loader');
-                if (loader) {
-                    loader.classList.add('opacity-0', 'pointer-events-none');
-                    setTimeout(() => loader.remove(), 600);
-                }
-            }, 350);
-        });
-    </script>
-
-    <!-- ========================================================================= -->
-    <!-- HEADER & NAVBAR                                                           -->
-    <!-- ========================================================================= -->
-    <header class="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 transition-all">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-20">
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-16">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+            
+            <!-- Left Headline & CTA -->
+            <div class="lg:col-span-7 space-y-6">
                 
-                <!-- Logo & Brand Identity -->
-                <a href="{{ route('home') }}" class="flex items-center gap-3 group">
-                    <img src="{{ asset('images/logo.jpg') }}" alt="Retronics Logo"
-                         class="h-11 w-auto rounded-xl border border-slate-200 bg-white p-1 object-contain shadow-sm group-hover:scale-105 transition duration-200">
-                    <div>
-                        <span class="font-display text-2xl font-black tracking-tight text-slate-900 block leading-none">
-                            Retronics
-                        </span>
-                        <span class="text-[9px] uppercase tracking-widest font-bold text-brand-600 block mt-1">
-                            Camera Rental Service
-                        </span>
-                    </div>
-                </a>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-50 text-brand-700 border border-blue-200">
+                    <span>RENTAL GEAR PROFESIONAL · GUNUNG PUTRI, BOGOR</span>
+                </div>
 
-                <!-- Nav Links Minimalist -->
-                <nav class="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
-                    <a href="{{ route('home') }}" class="text-brand-600 font-bold transition">Beranda</a>
-                    <a href="{{ route('products.index') }}" class="hover:text-brand-600 transition">Katalog Gear</a>
-                    <a href="#cara-sewa" class="hover:text-brand-600 transition">Alur Sewa</a>
-                    <a href="#kalkulator" class="hover:text-brand-600 transition">Kalkulator</a>
-                    <a href="#keunggulan" class="hover:text-brand-600 transition">Keunggulan</a>
-                </nav>
+                <h1 class="text-3xl sm:text-5xl lg:text-5xl font-black text-slate-900 tracking-tight font-display leading-[1.15]">
+                    Sewa Kamera &<br>
+                    Peralatan Fotografi<br>
+                    Profesional di<br>
+                    Gunung Putri, Bogor
+                </h1>
 
-                <!-- Actions: Cart & Auth -->
-                <div class="flex items-center gap-3">
-                    <!-- Cart Button with Count Badge -->
-                    <a href="{{ route('cart.index') }}" class="relative p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition flex items-center gap-2 border border-slate-200/60" title="Keranjang Sewa">
-                        <span class="text-base">🛒</span>
-                        <span class="text-xs font-bold hidden sm:inline">Keranjang</span>
-                        @php
-                            $cartCount = array_sum(array_column(session('cart', []), 'quantity'));
-                        @endphp
-                        @if ($cartCount > 0)
-                            <span class="w-5 h-5 rounded-full bg-brand-600 text-white text-[10px] flex items-center justify-center font-black animate-pulse">
-                                {{ $cartCount }}
-                            </span>
-                        @endif
+                <p class="text-sm sm:text-base text-slate-600 leading-relaxed max-w-xl">
+                    Ide besar butuh gear yang tepat. Unit siap pakai, sensor dan optik terkalibrasi bersih, tanpa birokrasi berbelit.
+                </p>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap items-center gap-3 pt-2">
+                    <a href="{{ route('products.index') }}"
+                       class="px-6 py-3.5 rounded-xl font-bold text-xs sm:text-sm text-white bg-brand-600 hover:bg-brand-700 shadow-md shadow-brand-500/20 transition flex items-center gap-2">
+                        <span>Jelajahi Katalog ↗</span>
                     </a>
 
-                    @auth
-                        @if (auth()->user()->isAdmin())
-                            <a href="{{ route('admin.dashboard') }}" class="px-3.5 py-2 text-xs font-bold rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 transition shadow-sm">
-                                👑 Panel Admin
-                            </a>
-                        @else
-                            <a href="{{ route('account.index') }}" class="px-3.5 py-2 text-xs font-bold rounded-xl bg-blue-50 text-brand-700 hover:bg-blue-100 transition border border-blue-200/60">
-                                👤 Akun Saya
-                            </a>
-                        @endif
-                    @else
-                        <a href="{{ route('login') }}" class="px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-brand-600 transition">
-                            Masuk
-                        </a>
-                        <a href="{{ route('register') }}" class="px-4 py-2 text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-xl shadow-sm transition">
-                            Daftar
-                        </a>
-                    @endauth
+                    <a href="{{ route('promo') }}"
+                       class="px-6 py-3.5 rounded-xl font-bold text-xs sm:text-sm text-slate-800 bg-white hover:bg-slate-50 border border-slate-300 shadow-xs transition">
+                        <span>Cek Promo Aktif</span>
+                    </a>
+
+                    <a href="#cara-sewa"
+                       class="px-5 py-3.5 rounded-xl font-bold text-xs sm:text-sm text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition flex items-center gap-1.5">
+                        <span>📋 Lihat Alur Penyewaan</span>
+                    </a>
+
+                    <a href="#kalkulator"
+                       class="px-5 py-3.5 rounded-xl font-bold text-xs sm:text-sm text-brand-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition flex items-center gap-1.5">
+                        <span>🧮 Hitung Estimasi Sewa</span>
+                    </a>
                 </div>
+
+                <div class="flex items-center gap-2 text-xs text-slate-500 font-medium pt-1">
+                    <span class="text-emerald-600 font-bold">✓</span>
+                    <span>Diperiksa sebelum berangkat. Siap saat kamu berkarya.</span>
+                </div>
+
+            </div>
+
+            <!-- Right Hero Card (Camera Photo with Floating Badge) -->
+            <div class="lg:col-span-5 relative">
+                <div class="relative bg-gradient-to-b from-slate-100 to-slate-200/80 rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm overflow-hidden flex items-center justify-center min-h-[360px]">
+                    <img src="{{ asset('images/products/canon-eos-r50.png') }}"
+                         alt="Canon EOS R50"
+                         class="max-h-64 sm:max-h-72 w-auto object-contain drop-shadow-2xl transition duration-500 hover:scale-105"
+                         onerror="this.onerror=null; this.src='{{ asset('images/hero-bg.jpg') }}';">
+
+                    <!-- Floating Badge matching design -->
+                    <div class="absolute bottom-5 inset-x-5 bg-white/95 backdrop-blur-md rounded-2xl p-4 border border-slate-200/80 shadow-lg flex items-center justify-between">
+                        <div>
+                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">PILIHAN UNTUK IDE PERTAMAMU</span>
+                            <span class="font-bold text-slate-900 text-sm block">Canon EOS R50</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="font-black text-brand-600 text-base font-display">Rp150.000</span>
+                            <span class="text-[10px] text-slate-400 block -mt-0.5">per hari</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- STATS HIGHLIGHT STRIP (MATCHING DESIGN)                                   -->
+        <!-- ========================================================================= -->
+        <div class="mt-14 pt-8 border-t border-slate-200 grid grid-cols-2 md:grid-cols-4 gap-6 items-center">
+            <div>
+                <p class="text-xs sm:text-sm font-semibold text-slate-800 leading-snug">
+                    Standar profesional.<br>
+                    Akses yang lebih sederhana.
+                </p>
+            </div>
+            <div>
+                <span class="block font-display font-black text-2xl sm:text-3xl text-slate-900">15+</span>
+                <span class="text-xs text-slate-500 font-medium">Gear Siap Sewa</span>
+            </div>
+            <div>
+                <span class="block font-display font-black text-2xl sm:text-3xl text-slate-900">100%</span>
+                <span class="text-xs text-slate-500 font-medium">Sensor Bersih</span>
+            </div>
+            <div>
+                <span class="block font-display font-black text-2xl sm:text-3xl text-slate-900">4.9★</span>
+                <span class="text-xs text-slate-500 font-medium">Rating · contoh tampilan</span>
             </div>
         </div>
-    </header>
+    </section>
 
     <!-- ========================================================================= -->
-    <!-- MAIN CONTENT                                                              -->
+    <!-- 2. "APA YANG INGIN KAMU CIPTAKAN?" (CATEGORY SELECTOR)                     -->
     <!-- ========================================================================= -->
-    <main class="w-full flex-grow">
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="flex items-center justify-between mb-5">
+            <h2 class="text-lg sm:text-xl font-bold text-slate-900 font-display">
+                Apa yang ingin kamu ciptakan?
+            </h2>
+            <a href="{{ route('products.index') }}" class="text-xs font-semibold text-slate-600 hover:text-brand-600 flex items-center gap-1 transition">
+                <span>Lihat semua kategori ↗</span>
+            </a>
+        </div>
 
-        <!-- 1. HERO SECTION DENGAN BACKGROUND GAMBAR & FRAMING VIEWFINDER -->
-        <section class="relative overflow-hidden bg-slate-100 border-b border-slate-200/90">
-            <!-- Background Image -->
-            <div class="absolute inset-0 bg-cover bg-center transition-all duration-700"
-                 style="background-image: url('{{ asset('images/hero-bg.jpg') }}');">
-            </div>
-
-            <!-- Soft Overlay with Subtle Radial Focus (Kamera sudut tetap terlihat, teks di tengah tetap 100% kontras & tajam) -->
-            <div class="absolute inset-0 bg-gradient-to-r from-white/95 via-white/85 to-white/70 backdrop-blur-[1.5px]"></div>
-            <div class="absolute inset-0 bg-gradient-to-b from-white/40 via-transparent to-slate-100/90"></div>
-
-            <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
-                <div class="max-w-3xl">
-                    
-                    <!-- Viewfinder Focus Badge -->
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-50 text-brand-700 border border-blue-200/80 mb-5 shadow-xs">
-                        <span class="w-2 h-2 rounded-full bg-brand-600 animate-ping"></span>
-                        <span>[ • READY TO SHOOT ] Rental Kamera & Gear Fotografi Surabaya</span>
-                    </div>
-
-                    <!-- Main Headline -->
-                    <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight font-display leading-[1.12]">
-                        Sewa Kamera & Peralatan Fotografi Profesional
-                    </h1>
-
-                    <!-- Clear Subtitle -->
-                    <p class="mt-5 text-base sm:text-lg text-slate-700 leading-relaxed font-normal">
-                        Pilihan terlengkap bodi kamera mirrorless & DSLR, lensa premium, tata cahaya studio, drone, dan gimbal stabilizer. Unit siap pakai, sensor bersih, dan verifikasi cepat tanpa birokrasi berbelit.
-                    </p>
-
-                    <!-- CTAs -->
-                    <div class="mt-8 flex flex-wrap items-center gap-3">
-                        <a href="{{ route('products.index') }}" class="px-6 py-3.5 rounded-xl font-bold text-sm text-white bg-brand-600 hover:bg-brand-700 shadow-lg shadow-brand-500/25 transition flex items-center gap-2">
-                            <span>Jelajahi Katalog Peralatan</span>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                        </a>
-
-                        <a href="{{ route('cart.index') }}" class="px-6 py-3.5 rounded-xl font-bold text-sm text-slate-800 bg-white/90 hover:bg-white border border-slate-300 shadow-sm transition backdrop-blur-sm">
-                            Cek Keranjang Sewa
-                        </a>
-                    </div>
-
-                    <!-- Key Stats Highlights -->
-                    <div class="mt-10 pt-6 border-t border-slate-300/60 grid grid-cols-3 gap-4 sm:gap-8 max-w-lg">
-                        <div>
-                            <span class="block font-display font-extrabold text-2xl sm:text-3xl text-slate-900">{{ $stats['total_models'] }}+</span>
-                            <span class="text-xs text-slate-600 font-medium">Model Gear Siap Sewa</span>
-                        </div>
-                        <div>
-                            <span class="block font-display font-extrabold text-2xl sm:text-3xl text-brand-600">100%</span>
-                            <span class="text-xs text-slate-600 font-medium">Sensor & Optik Bersih</span>
-                        </div>
-                        <div>
-                            <span class="block font-display font-extrabold text-2xl sm:text-3xl text-emerald-600">4.9 ★</span>
-                            <span class="text-xs text-slate-600 font-medium">Rating Pelanggan</span>
-                        </div>
-                    </div>
-
-                    <!-- Category Quick Filter Pills -->
-                    <div class="mt-8 flex flex-wrap items-center gap-2">
-                        <span class="text-xs font-bold text-slate-500 mr-1">Kategori:</span>
-                        @foreach ($categories as $cat)
-                            <a href="{{ route('products.index', ['category' => $cat->name]) }}" class="px-3 py-1.5 rounded-lg bg-white/90 border border-slate-200/90 hover:border-brand-500 hover:text-brand-600 text-xs font-semibold text-slate-700 shadow-xs transition backdrop-blur-sm">
-                                {{ $cat->name }} ({{ $cat->products_count }})
-                            </a>
-                        @endforeach
-                    </div>
-
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <a href="{{ route('products.index', ['category' => 'Kamera']) }}"
+               class="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-xs hover:border-brand-500 hover:shadow-md transition flex items-center justify-between group">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-lg">📷</span>
+                    <span class="font-bold text-xs sm:text-sm text-slate-800 group-hover:text-brand-600 transition">Kamera</span>
                 </div>
-            </div>
-        </section>
+                <span class="text-slate-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform text-xs">↗</span>
+            </a>
 
-        <!-- 2. ALUR 4 LANGKAH SEWA (FLOWCHART RESMI RETRONICS) -->
-        <section id="cara-sewa" class="bg-white border-b border-slate-200/80 py-16 sm:py-20">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                
-                <div class="text-center max-w-2xl mx-auto mb-14 reveal-on-scroll">
-                    <span class="text-xs font-bold uppercase tracking-widest text-brand-600 block mb-1.5">Alur Flowchart Sistem</span>
-                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 font-display">
-                        Cara Mudah Menyewa Peralatan di Retronics
-                    </h2>
-                    <p class="text-xs sm:text-sm text-slate-500 mt-2">
-                        Empat tahap sederhana dan transparan sesuai alur operasional resmi penyewaan kami.
-                    </p>
+            <a href="{{ route('products.index', ['category' => 'Lensa']) }}"
+               class="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-xs hover:border-brand-500 hover:shadow-md transition flex items-center justify-between group">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-lg">🔍</span>
+                    <span class="font-bold text-xs sm:text-sm text-slate-800 group-hover:text-brand-600 transition">Lensa</span>
                 </div>
+                <span class="text-slate-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform text-xs">↗</span>
+            </a>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <!-- Step 1 -->
-                    <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200/90 relative group hover:border-brand-400 hover:bg-white hover:shadow-lg transition duration-300 reveal-on-scroll delay-100">
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="w-9 h-9 rounded-xl bg-brand-600 text-white font-black text-sm flex items-center justify-center shadow-md shadow-brand-500/20">
-                                1
-                            </span>
-                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Tahap 1</span>
-                        </div>
-                        <h3 class="text-base font-bold text-slate-900 group-hover:text-brand-600 transition">Pilih Gear & Unit</h3>
-                        <p class="text-xs text-slate-500 mt-2 leading-relaxed">
-                            Telusuri katalog bodi kamera mirrorless/DSLR, lensa, lighting, atau stabilizer dan tentukan jumlah unit yang dibutuhkan.
-                        </p>
-                    </div>
-
-                    <!-- Step 2 -->
-                    <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200/90 relative group hover:border-brand-400 hover:bg-white hover:shadow-lg transition duration-300 reveal-on-scroll delay-200">
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="w-9 h-9 rounded-xl bg-brand-600 text-white font-black text-sm flex items-center justify-center shadow-md shadow-brand-500/20">
-                                2
-                            </span>
-                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Tahap 2</span>
-                        </div>
-                        <h3 class="text-base font-bold text-slate-900 group-hover:text-brand-600 transition">Tentukan Tanggal & Keranjang</h3>
-                        <p class="text-xs text-slate-500 mt-2 leading-relaxed">
-                            Masukkan ke keranjang sewa, pilih tanggal mulai serta durasi hari. Sistem menghitung rincian biaya sewa dan diskon durasi.
-                        </p>
-                    </div>
-
-                    <!-- Step 3 -->
-                    <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200/90 relative group hover:border-brand-400 hover:bg-white hover:shadow-lg transition duration-300 reveal-on-scroll delay-300">
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="w-9 h-9 rounded-xl bg-brand-600 text-white font-black text-sm flex items-center justify-center shadow-md shadow-brand-500/20">
-                                3
-                            </span>
-                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Tahap 3</span>
-                        </div>
-                        <h3 class="text-base font-bold text-slate-900 group-hover:text-brand-600 transition">Bayar & Verifikasi</h3>
-                        <p class="text-xs text-slate-500 mt-2 leading-relaxed">
-                            Kirim permintaan pemesanan, lakukan pembayaran via transfer/QRIS, lalu unggah bukti. Admin segera memverifikasi pesanan Anda.
-                        </p>
-                    </div>
-
-                    <!-- Step 4 -->
-                    <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200/90 relative group hover:border-brand-400 hover:bg-white hover:shadow-lg transition duration-300 reveal-on-scroll delay-400">
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="w-9 h-9 rounded-xl bg-brand-600 text-white font-black text-sm flex items-center justify-center shadow-md shadow-brand-500/20">
-                                4
-                            </span>
-                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Tahap 4</span>
-                        </div>
-                        <h3 class="text-base font-bold text-slate-900 group-hover:text-brand-600 transition">Ambil & Produksi</h3>
-                        <p class="text-xs text-slate-500 mt-2 leading-relaxed">
-                            Ambil gear di store kami pada hari-H. Gunakan unit untuk kebutuhan produksi Anda dan kembalikan unit tepat waktu.
-                        </p>
-                    </div>
+            <a href="{{ route('products.index', ['category' => 'Pencahayaan']) }}"
+               class="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-xs hover:border-brand-500 hover:shadow-md transition flex items-center justify-between group">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-lg">💡</span>
+                    <span class="font-bold text-xs sm:text-sm text-slate-800 group-hover:text-brand-600 transition">Lighting</span>
                 </div>
-            </div>
-        </section>
+                <span class="text-slate-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform text-xs">↗</span>
+            </a>
 
-        <!-- 3. SOROTAN KATALOG POPULER (FEATURED PRODUCTS) -->
-        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
-            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 reveal-on-scroll">
-                <div>
-                    <span class="text-xs font-bold uppercase tracking-widest text-brand-600 block mb-1">Inventaris Pilihan</span>
-                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-display">
-                        Peralatan Fotografi Populer
-                    </h2>
-                    <p class="text-xs sm:text-sm text-slate-500 mt-1">
-                        Peralatan terbaik yang paling sering disewa oleh fotografer, videografer, dan tim produksi.
-                    </p>
+            <a href="{{ route('products.index', ['category' => 'Aksesori']) }}"
+               class="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-xs hover:border-brand-500 hover:shadow-md transition flex items-center justify-between group">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-lg">🧰</span>
+                    <span class="font-bold text-xs sm:text-sm text-slate-800 group-hover:text-brand-600 transition">Aksesori</span>
                 </div>
+                <span class="text-slate-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform text-xs">↗</span>
+            </a>
+        </div>
+    </section>
 
-                <a href="{{ route('products.index') }}" class="text-xs sm:text-sm font-bold text-brand-600 hover:text-brand-700 flex items-center gap-1.5 transition group">
-                    <span>Lihat Semua Katalog ({{ $stats['total_models'] }} Gear)</span>
-                    <span class="group-hover:translate-x-1 transition-transform">→</span>
-                </a>
-            </div>
-
-            <!-- Grid 4 Columns -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                @foreach ($featuredProducts as $index => $product)
-                    <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-xl hover:border-brand-400 transition-all duration-300 flex flex-col justify-between overflow-hidden group reveal-on-scroll delay-{{ ($index % 4 + 1) * 100 }}">
-                        <div>
-                            <!-- Image Container -->
-                            <div class="relative bg-slate-50 p-4 h-52 flex items-center justify-center overflow-hidden border-b border-slate-100">
-                                <span class="absolute top-3 left-3 text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/95 text-slate-700 shadow-xs border border-slate-200">
-                                    {{ $product->category->name ?? 'Gear' }}
-                                </span>
-
-                                <span class="absolute top-3 right-3 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                    Stok: {{ $product->stock }}
-                                </span>
-
-                                @if ($product->image)
-                                    <img src="{{ asset('storage/' . $product->image) }}"
-                                         alt="{{ $product->name }}"
-                                         class="max-h-40 max-w-full object-contain drop-shadow transition duration-300 group-hover:scale-105"
-                                         onerror="this.onerror=null; this.src='{{ asset('images/products/' . $product->image) }}';">
-                                @else
-                                    <div class="w-16 h-16 rounded-2xl bg-white shadow-xs flex items-center justify-center text-3xl">
-                                        📷
-                                    </div>
-                                @endif
-                            </div>
-
-                            <!-- Details -->
-                            <div class="p-5">
-                                <span class="text-[10px] font-semibold text-slate-400 block mb-1">
-                                    Kondisi: <strong class="text-emerald-700 capitalize">{{ $product->condition }}</strong>
-                                </span>
-
-                                <a href="{{ route('products.show', $product->slug) }}">
-                                    <h3 class="font-bold text-slate-900 text-sm group-hover:text-brand-600 transition line-clamp-1">
-                                        {{ $product->name }}
-                                    </h3>
-                                </a>
-
-                                <p class="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
-                                    {{ $product->description }}
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- Price & Action -->
-                        <div class="p-5 pt-0">
-                            <div class="pt-3 border-t border-slate-100 flex items-baseline justify-between mb-3">
-                                <div>
-                                    <span class="text-[10px] text-slate-400 block">Tarif Sewa</span>
-                                    <span class="text-base font-bold text-brand-600 font-display">
-                                        Rp{{ number_format($product->price_per_day, 0, ',', '.') }}
-                                    </span>
-                                    <span class="text-[10px] text-slate-400">/ hari</span>
-                                </div>
-
-                                <a href="{{ route('products.show', $product->slug) }}" class="text-xs font-semibold text-slate-500 hover:text-brand-600 underline">
-                                    Detail
-                                </a>
-                            </div>
-
-                            <form method="POST" action="{{ route('cart.add') }}">
-                                @csrf
-                                <input type="hidden" name="product_id" value="{{ $product->id }}">
-                                <input type="hidden" name="quantity" value="1">
-                                <input type="hidden" name="duration_days" value="1">
-                                <button type="submit"
-                                        class="w-full py-2.5 px-3 rounded-xl font-bold text-xs text-white bg-slate-900 hover:bg-brand-600 shadow-sm transition flex items-center justify-center gap-1.5">
-                                    <span>+ Tambah ke Keranjang</span>
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </section>
-
-        <!-- 4. KALKULATOR SEWA INTERAKTIF -->
-        <section id="kalkulator" class="bg-slate-100/80 border-t border-slate-200 py-16 sm:py-20">
-            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-10 reveal-on-scroll">
-                    <span class="text-xs font-bold uppercase tracking-widest text-brand-600 block mb-1">Simulasi Biaya Cepat</span>
-                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-display">
-                        Kalkulator Sewa Interaktif
-                    </h2>
-                    <p class="text-xs sm:text-sm text-slate-500 mt-1">
-                        Pilih perlengkapan dan tentukan durasi sewa untuk melihat rincian biaya seketika.
-                    </p>
+    <!-- ========================================================================= -->
+    <!-- 3. PROMO BANNER (MATCHING DESIGN BLUE CONTAINER)                          -->
+    <!-- ========================================================================= -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="rounded-3xl bg-brand-600 text-white p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-md">
+            
+            <div class="space-y-2 text-center md:text-left">
+                <div class="inline-block px-2.5 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-bold tracking-wider uppercase">
+                    PROMO CONTOH · 01 / 03
                 </div>
-
-                <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-md reveal-on-scroll delay-100">
-                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-6 items-center">
-                        
-                        <!-- Inputs -->
-                        <div class="sm:col-span-6 space-y-5">
-                            <div>
-                                <label for="calc-product" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">
-                                    Pilih Peralatan
-                                </label>
-                                <select id="calc-product" class="w-full px-3.5 py-2.5 text-xs sm:text-sm rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500">
-                                    @foreach ($products as $p)
-                                        <option value="{{ $p->id }}" data-price="{{ $p->price_per_day }}" data-name="{{ $p->name }}">
-                                            {{ $p->name }} (Rp{{ number_format($p->price_per_day, 0, ',', '.') }}/hari)
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div>
-                                <label for="calc-days" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">
-                                    Durasi Sewa (Hari)
-                                </label>
-                                <div class="flex items-center gap-3">
-                                    <input type="range" id="calc-days" min="1" max="14" value="2" class="w-full accent-brand-600 cursor-pointer">
-                                    <span id="calc-days-label" class="w-16 text-center font-bold text-sm px-2.5 py-1.5 bg-slate-100 rounded-lg text-slate-800">
-                                        2 Hari
-                                    </span>
-                                </div>
-                                <span class="text-[10px] text-slate-400 block mt-1.5">Diskon durasi: &ge; 3 hari diskon 15%, &ge; 7 hari diskon 25%</span>
-                            </div>
-                        </div>
-
-                        <!-- Calculation Output Box -->
-                        <div class="sm:col-span-6 bg-slate-50 p-6 rounded-2xl border border-slate-200/90">
-                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Estimasi Total Biaya</span>
-                            <div class="flex items-baseline gap-2">
-                                <span id="calc-total" class="text-3xl font-black text-brand-600 font-display">
-                                    Rp0
-                                </span>
-                            </div>
-                            <span id="calc-discount" class="text-xs text-emerald-600 font-semibold block mt-1">
-                                Diskon Durasi: Rp0
-                            </span>
-
-                            <div class="mt-5 pt-4 border-t border-slate-200">
-                                <button type="button"
-                                        id="calc-add-btn"
-                                        class="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold transition shadow-sm">
-                                    Sewa Gear Ini Sekarang →
-                                </button>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Script Calculator -->
-        <script>
-            (function () {
-                const productSelect = document.getElementById('calc-product');
-                const daysRange = document.getElementById('calc-days');
-                const daysLabel = document.getElementById('calc-days-label');
-                const totalLabel = document.getElementById('calc-total');
-                const discountLabel = document.getElementById('calc-discount');
-                const addBtn = document.getElementById('calc-add-btn');
-
-                function calculate() {
-                    if (!productSelect || !productSelect.options.length) return;
-                    const selected = productSelect.options[productSelect.selectedIndex];
-                    const price = parseFloat(selected.getAttribute('data-price')) || 0;
-                    const days = parseInt(daysRange.value) || 1;
-
-                    daysLabel.textContent = days + ' Hari';
-
-                    const gross = price * days;
-                    let discountRate = 0;
-                    if (days >= 7) discountRate = 0.25;
-                    else if (days >= 3) discountRate = 0.15;
-                    else if (days >= 2) discountRate = 0.05;
-
-                    const discount = gross * discountRate;
-                    const total = gross - discount;
-
-                    totalLabel.textContent = 'Rp' + Math.round(total).toLocaleString('id-ID');
-                    if (discountRate > 0) {
-                        discountLabel.textContent = 'Hemat ' + (discountRate * 100) + '% (-Rp' + Math.round(discount).toLocaleString('id-ID') + ')';
-                        discountLabel.classList.remove('hidden');
-                    } else {
-                        discountLabel.textContent = 'Tanpa potongan durasi';
-                    }
-                }
-
-                if (productSelect && daysRange) {
-                    productSelect.addEventListener('change', calculate);
-                    daysRange.addEventListener('input', calculate);
-                    calculate();
-                }
-
-                if (addBtn && productSelect) {
-                    addBtn.addEventListener('click', () => {
-                        const productId = productSelect.value;
-                        const days = daysRange.value;
-                        window.location.href = "{{ route('rentals.create') }}?product_id=" + productId + "&days=" + days;
-                    });
-                }
-            })();
-        </script>
-
-        <!-- 5. KEUNGGULAN / STANDAR KUALITAS RETRONICS -->
-        <section id="keunggulan" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
-            <div class="text-center max-w-xl mx-auto mb-12 reveal-on-scroll">
-                <span class="text-xs font-bold uppercase tracking-widest text-brand-600 block mb-1">Standar Kualitas Retronics</span>
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-display">
-                    Gear Siap Pakai Untuk Produksi
+                <h2 class="text-xl sm:text-3xl font-black font-display text-white">
+                    Lebih banyak karya. Lebih hemat 10%.
                 </h2>
-                <p class="text-xs sm:text-sm text-slate-500 mt-1">
-                    Setiap unit kamera dan perlengkapan melalui uji fungsi menyeluruh sebelum diserahkan kepada penyewa.
+                <p class="text-xs sm:text-sm text-blue-100 font-medium">
+                    Min. Rp200.000 · s/d 31 Des 2026 · 14 kuota tersisa
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
-                <!-- Card 1 -->
-                <div class="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm hover:shadow-md transition reveal-on-scroll delay-100">
-                    <span class="text-3xl block mb-3">✨</span>
-                    <h3 class="font-bold text-slate-900 text-sm">Sensor & Lensa Bersih</h3>
-                    <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                        Sensor kamera dibersihkan rutin dari debu/jamur, dan optik lensa jernih untuk hasil foto dan video maksimal.
-                    </p>
-                </div>
-
-                <!-- Card 2 -->
-                <div class="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm hover:shadow-md transition reveal-on-scroll delay-200">
-                    <span class="text-3xl block mb-3">📋</span>
-                    <h3 class="font-bold text-slate-900 text-sm">Syarat Sewa Transparan</h3>
-                    <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                        Verifikasi identitas KTP/KTM mahasiswa cepat, tanpa deposit berlebihan, dan alur konfirmasi transparan.
-                    </p>
-                </div>
-
-                <!-- Card 3 -->
-                <div class="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm hover:shadow-md transition reveal-on-scroll delay-300">
-                    <span class="text-3xl block mb-3">⚡</span>
-                    <h3 class="font-bold text-slate-900 text-sm">Pengambilan Tepat Waktu</h3>
-                    <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                        Unit dipersiapkan dan diuji sebelum jadwal sewa dimulai sehingga jadwal pemotretan Anda berjalan tanpa hambatan.
-                    </p>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- ========================================================================= -->
-    <!-- FOOTER WITH RETRONICS BRANDING                                            -->
-    <!-- ========================================================================= -->
-    <footer class="bg-white border-t border-slate-200 py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row items-center justify-between gap-6 pb-8 border-b border-slate-100">
-                
-                <!-- Logo & Short Bio -->
-                <div class="flex items-center gap-3">
-                    <img src="{{ asset('images/logo.jpg') }}" alt="Retronics Logo" class="h-10 w-auto rounded-xl border border-slate-200 bg-white p-1 object-contain">
-                    <div>
-                        <span class="font-display font-black text-slate-900 text-base block leading-none">Retronics</span>
-                        <span class="text-[11px] text-slate-500 block mt-1">Rental Kamera & Studio Fotografi Profesional di Surabaya</span>
-                    </div>
-                </div>
-
-                <!-- Footer Navigation -->
-                <div class="flex flex-wrap items-center gap-6 text-xs font-semibold text-slate-600">
-                    <a href="{{ route('products.index') }}" class="hover:text-brand-600 transition">Katalog Gear</a>
-                    <a href="{{ route('cart.index') }}" class="hover:text-brand-600 transition">Keranjang</a>
-                    <a href="{{ route('login') }}" class="hover:text-brand-600 transition">Login Pelanggan</a>
-                    <a href="{{ route('admin.login') }}" class="hover:text-brand-600 transition">Portal Khusus Admin</a>
-                </div>
-
+            <!-- Promo Code Box with Copy Action -->
+            <div class="p-3.5 rounded-2xl bg-white/10 border border-dashed border-white/40 flex items-center gap-4">
+                <span class="font-mono font-black text-lg sm:text-xl tracking-wider text-white px-2">RETRONICS10</span>
+                <button type="button"
+                        onclick="copyToClipboard('RETRONICS10', 'Kode RETRONICS10 berhasil disalin!')"
+                        class="px-4 py-2 rounded-xl bg-white text-brand-600 hover:bg-blue-50 font-bold text-xs transition shadow-xs">
+                    Salin Kode
+                </button>
             </div>
 
-            <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
-                <p>&copy; 2026 Retronics Camera Rental Service. Seluruh hak cipta dilindungi.</p>
-                <p>Jam Operasional: Senin - Minggu (08.00 - 21.00 WIB)</p>
+        </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- 4. ALUR SEWA ("SEDERHANA DARI PILIH SAMPAI BERKARYA")                      -->
+    <!-- ========================================================================= -->
+    <span id="alur-sewa" class="scroll-mt-24 block -mt-24 pt-24 pointer-events-none"></span>
+    <section id="cara-sewa" class="scroll-mt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 mb-10 pb-4 border-b border-slate-200">
+            <h2 class="text-2xl sm:text-3xl font-black text-slate-900 font-display">
+                Sederhana dari pilih sampai berkarya.
+            </h2>
+            <span class="text-xs text-slate-500">
+                Tidak harus lewat keranjang. Langsung sewa juga bisa.
+            </span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <!-- 01 -->
+            <div>
+                <span class="font-display font-black text-3xl sm:text-4xl text-brand-600 block mb-2">01</span>
+                <h3 class="font-bold text-slate-900 text-sm mb-1.5">Pilih Gear & Unit</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    Temukan kamera, lensa, atau lighting sesuai kebutuhan produksi Anda.
+                </p>
+            </div>
+
+            <!-- 02 -->
+            <div>
+                <span class="font-display font-black text-3xl sm:text-4xl text-brand-600 block mb-2">02</span>
+                <h3 class="font-bold text-slate-900 text-sm mb-1.5">Tentukan Jadwal Sewa</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    Atur tanggal mulai dan durasi penggunaan secara fleksibel.
+                </p>
+            </div>
+
+            <!-- 03 -->
+            <div>
+                <span class="font-display font-black text-3xl sm:text-4xl text-brand-600 block mb-2">03</span>
+                <h3 class="font-bold text-slate-900 text-sm mb-1.5">Bayar & Verifikasi Admin</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    Transfer manual, unggah bukti, dan tunggu konfirmasi cepat admin.
+                </p>
+            </div>
+
+            <!-- 04 -->
+            <div>
+                <span class="font-display font-black text-3xl sm:text-4xl text-brand-600 block mb-2">04</span>
+                <h3 class="font-bold text-slate-900 text-sm mb-1.5">Ambil di Store & Berkarya</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    Cek bersama, bawa gear, kembalikan tepat waktu di store kami.
+                </p>
             </div>
         </div>
-    </footer>
+    </section>
 
     <!-- ========================================================================= -->
-    <!-- SCRIPT ANIMASI PUDAR MASUK KETIKA SCROLL (INTERSECTION OBSERVER)           -->
+    <!-- 5. FEATURED GEAR ("GEAR ANDALAN, SIAP UNTUK IDEMU")                        -->
     <!-- ========================================================================= -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-brand-600 block mb-1">PILIHAN KREATOR</span>
+                <h2 class="text-2xl sm:text-3xl font-black text-slate-900 font-display">
+                    Gear andalan, siap untuk idemu.
+                </h2>
+            </div>
+            <a href="{{ route('products.index') }}" class="text-xs font-bold text-slate-700 hover:text-brand-600 transition flex items-center gap-1">
+                <span>Semua Gear ↗</span>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            @foreach ($featuredProducts as $index => $prod)
+                <x-product-card :product="$prod" :index="$index" />
+            @endforeach
+        </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- 6. KALKULATOR SEWA ("HITUNG DULU. BERKARYA DENGAN TENANG.")               -->
+    <!-- ========================================================================= -->
+    <section id="kalkulator" class="scroll-mt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+            
+            <!-- Left Info -->
+            <div class="lg:col-span-5 space-y-4">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-brand-600 block">RENCANAKAN BUDGET</span>
+                <h2 class="text-3xl sm:text-4xl font-black text-slate-900 font-display leading-tight">
+                    Hitung dulu.<br>
+                    Berkarya dengan tenang.
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                    Transparan sejak awal. Pilih gear dan durasi untuk melihat estimasi sebelum mengajukan pesanan.
+                </p>
+                <p class="text-[11px] text-slate-400 leading-relaxed pt-2">
+                    *Tarif diskon durasi berikut hanya simulasi, belum menjadi ketentuan resmi store.
+                </p>
+            </div>
+
+            <!-- Right Calculator Card -->
+            <div class="lg:col-span-7">
+                <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm space-y-5">
+                    <h3 class="font-display font-bold text-lg text-slate-900 pb-3 border-b border-slate-100">
+                        Kalkulator sewa
+                    </h3>
+
+                    <div>
+                        <label for="home-calc-gear" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">
+                            Gear pilihan
+                        </label>
+                        <select id="home-calc-gear" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            @foreach ($products as $p)
+                                <option value="{{ $p->id }}" data-price="{{ (int) $p->price_per_day }}">
+                                    {{ $p->name }} · Rp{{ number_format($p->price_per_day, 0, ',', '.') }}/hari
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <label for="home-calc-days" class="text-xs font-bold text-slate-700 uppercase">Durasi sewa</label>
+                            <span id="home-calc-days-label" class="px-2.5 py-0.5 rounded-full bg-blue-50 text-brand-700 text-xs font-bold">
+                                3 hari
+                            </span>
+                        </div>
+                        <input type="range" id="home-calc-days" min="1" max="14" value="3" class="w-full accent-brand-600 cursor-pointer">
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>1 hari</span>
+                            <span>14 hari</span>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-xs space-y-2">
+                        <div class="flex justify-between text-slate-600">
+                            <span id="home-calc-gross-label">Harga kotor · 3 hari:</span>
+                            <span id="home-calc-gross-val" class="font-bold text-slate-800">Rp450.000</span>
+                        </div>
+                        <div class="flex justify-between text-emerald-600 font-semibold" id="home-calc-disc-row">
+                            <span id="home-calc-disc-rate">Diskon simulasi 5%:</span>
+                            <span id="home-calc-disc-val">-Rp22.500</span>
+                        </div>
+                        <div class="pt-2 border-t border-slate-200 flex justify-between items-baseline">
+                            <span class="font-bold text-slate-700">Estimasi sewa:</span>
+                            <span id="home-calc-total-val" class="text-2xl font-black text-slate-900 font-display">Rp427.500</span>
+                        </div>
+                    </div>
+
+                    @if(auth()->check() && auth()->user()->isAdmin())
+                        <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-center text-xs font-bold text-amber-800">
+                            Simulasi estimasi sewa aktif (Akun Admin hanya digunakan untuk pemantauan/administrasi).
+                        </div>
+                    @else
+                        <button type="button"
+                                id="home-calc-btn-sewa"
+                                class="w-full py-3.5 px-4 rounded-xl font-bold text-xs sm:text-sm text-white bg-brand-600 hover:bg-brand-700 shadow-md shadow-brand-500/25 transition flex items-center justify-center gap-2">
+                            <span>⚡ Sewa Sekarang</span>
+                        </button>
+                    @endif
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Script Kalkulator Home -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const reveals = document.querySelectorAll('.reveal-on-scroll');
-            if ('IntersectionObserver' in window) {
-                const observer = new IntersectionObserver((entries, obs) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            entry.target.classList.add('is-revealed');
-                            obs.unobserve(entry.target);
-                        }
-                    });
-                }, {
-                    threshold: 0.1,
-                    rootMargin: '0px 0px -30px 0px'
-                });
+        (function() {
+            const gearSelect = document.getElementById('home-calc-gear');
+            const daysSlider = document.getElementById('home-calc-days');
+            const daysLabel = document.getElementById('home-calc-days-label');
+            const grossLabel = document.getElementById('home-calc-gross-label');
+            const grossVal = document.getElementById('home-calc-gross-val');
+            const discRate = document.getElementById('home-calc-disc-rate');
+            const discVal = document.getElementById('home-calc-disc-val');
+            const totalVal = document.getElementById('home-calc-total-val');
+            const btnSewa = document.getElementById('home-calc-btn-sewa');
 
-                reveals.forEach(el => observer.observe(el));
-            } else {
-                // Fallback jika browser lawas
-                reveals.forEach(el => el.classList.add('is-revealed'));
+            function updateCalc() {
+                if (!gearSelect || !daysSlider) return;
+                const opt = gearSelect.options[gearSelect.selectedIndex];
+                const price = parseInt(opt.getAttribute('data-price') || 0);
+                const days = parseInt(daysSlider.value || 1);
+
+                daysLabel.innerText = days + ' hari';
+                grossLabel.innerText = 'Harga kotor · ' + days + ' hari';
+
+                let discountPercent = 0;
+                if (days >= 7) discountPercent = 0.25;
+                else if (days >= 3) discountPercent = 0.15;
+                else if (days >= 2) discountPercent = 0.05;
+
+                const gross = price * days;
+                const disc = Math.round(gross * discountPercent);
+                const net = gross - disc;
+
+                grossVal.innerText = formatIDR(gross);
+                discRate.innerText = discountPercent > 0 ? 'Diskon simulasi ' + (discountPercent * 100) + '%:' : 'Diskon durasi:';
+                discVal.innerText = disc > 0 ? '-' + formatIDR(disc) : 'Rp0';
+                totalVal.innerText = formatIDR(net);
             }
-        });
+
+            if (gearSelect && daysSlider) {
+                gearSelect.addEventListener('change', updateCalc);
+                daysSlider.addEventListener('input', updateCalc);
+                updateCalc();
+            }
+
+            if (btnSewa && gearSelect && daysSlider) {
+                btnSewa.addEventListener('click', function() {
+                    const prodId = gearSelect.value;
+                    const days = daysSlider.value;
+                    window.location.href = "{{ route('rentals.create') }}?product_id=" + prodId + "&days=" + days;
+                });
+            }
+        })();
     </script>
 
-</body>
-</html>
+    <!-- ========================================================================= -->
+    <!-- 7. STANDAR KUALITAS ("FOKUS PADA KARYA. SISANYA, KAMI SIAPKAN.")           -->
+    <!-- ========================================================================= -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <h2 class="text-2xl sm:text-3xl font-black text-slate-900 font-display mb-8">
+            Fokus pada karya. Sisanya, kami siapkan.
+        </h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <!-- Card 1 -->
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-xs space-y-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-50 text-brand-600 flex items-center justify-center text-xl">
+                    🎯
+                </div>
+                <h3 class="font-bold text-slate-900 text-base">Sensor Bersih</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    Sensor dan optik terkalibrasi bersih. Unit diuji sebelum diserahkan kepada penyewa.
+                </p>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-xs space-y-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-50 text-brand-600 flex items-center justify-center text-xl">
+                    📋
+                </div>
+                <h3 class="font-bold text-slate-900 text-base">Syarat Transparan</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    Harga, kelengkapan, dan estimasi biaya terlihat sejak awal tanpa biaya siluman.
+                </p>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-xs space-y-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-50 text-brand-600 flex items-center justify-center text-xl">
+                    🕒
+                </div>
+                <h3 class="font-bold text-slate-900 text-base">Tepat Waktu</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    Status persiapan jelas agar jadwal produksimu tetap terjaga dengan lancar.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- 8. STORE / PICKUP SECTION ("AMBIL GEAR. KENALI UNITMU.")                  -->
+    <!-- ========================================================================= -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div class="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200/90 shadow-sm grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            
+            <div class="lg:col-span-5 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 flex items-center justify-center min-h-[260px]">
+                <img src="{{ asset('images/products/hard-case-kamera.png') }}"
+                     alt="Store Retronics"
+                     class="max-h-56 w-auto object-contain drop-shadow"
+                     onerror="this.onerror=null; this.src='{{ asset('images/hero-bg.jpg') }}';">
+            </div>
+
+            <div class="lg:col-span-7 space-y-4">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-brand-600 block">BERBASIS DI GUNUNG PUTRI, BOGOR</span>
+                <h2 class="text-2xl sm:text-3xl font-black text-slate-900 font-display">
+                    Ambil gear. Kenali unitmu. Mulai berkarya.
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                    Pengambilan dan pengembalian dilakukan di store. Tim kami membantu pengecekan unit dan kelengkapan bersama sebelum kamu berangkat.
+                </p>
+                <p class="text-xs text-slate-500">
+                    Alamat store: Gunung Putri, Kabupaten Bogor · Jam buka: 08.00 - 21.00 WIB · WhatsApp: +62 819-2951-3780
+                </p>
+                <div class="pt-2">
+                    <a href="https://wa.me/6281929513780?text=Halo%20Admin%20Retronics%2C%20saya%20ingin%20tanya%20lokasi%20store"
+                       target="_blank"
+                       class="inline-flex px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition">
+                        Panduan Pengambilan ↗
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- 9. FAQ ACCORDION ("HAL KECIL YANG PENTING SEBELUM SEWA.")                  -->
+    <!-- ========================================================================= -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <h2 class="text-2xl sm:text-3xl font-black text-slate-900 font-display mb-8">
+            Hal kecil yang penting sebelum sewa.
+        </h2>
+
+        <div class="space-y-4 max-w-4xl">
+            <div class="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs">
+                <h3 class="font-bold text-slate-900 text-sm mb-1.5">Bisa langsung sewa tanpa keranjang?</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    Bisa. Pilih tombol <strong>Sewa Sekarang</strong> dari kartu katalog atau halaman detail gear untuk langsung mengatur jadwal booking tanpa harus membuka keranjang.
+                </p>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs">
+                <h3 class="font-bold text-slate-900 text-sm mb-1.5">Bagaimana cara pembayaran?</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    Transfer manual melalui BCA, Mandiri, atau QRIS. Unggah bukti pembayaran, lalu admin kami segera memverifikasi pesanan Anda.
+                </p>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs">
+                <h3 class="font-bold text-slate-900 text-sm mb-1.5">Bagaimana jika terlambat mengembalikan?</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    Denda keterlambatan dihitung sebesar <strong>Rp50.000 per hari per unit</strong>. Pelunasan denda dilakukan secara transparan saat pengembalian barang ke store.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- 10. PRE-FOOTER BANNER                                                     -->
+    <!-- ========================================================================= -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="rounded-3xl bg-blue-50/70 border border-blue-200 p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div>
+                <h2 class="text-xl sm:text-2xl font-black text-slate-900 font-display">
+                    Ide berikutnya layak mendapatkan gear terbaik.
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-600 mt-1">
+                    Mulai dari kamera favoritmu. Atur jadwalnya hari ini.
+                </p>
+            </div>
+            <a href="{{ route('products.index') }}"
+               class="px-6 py-3.5 rounded-xl font-bold text-xs sm:text-sm text-white bg-brand-600 hover:bg-brand-700 shadow-md shadow-brand-500/20 transition flex items-center gap-1.5 shrink-0">
+                <span>Jelajahi Katalog ↗</span>
+            </a>
+        </div>
+    </section>
+
+@endsection
