@@ -32,6 +32,7 @@ class CartController extends Controller
             $products = Product::with('category')
                 ->whereIn('id', $productIds)
                 ->where('is_active', true)
+                ->where(fn ($q) => $q->whereNull('condition')->orWhere('condition', 'not like', '%Perawatan%'))
                 ->get()
                 ->keyBy('id');
 
@@ -112,8 +113,8 @@ class CartController extends Controller
 
         $product = Product::findOrFail($validated['product_id']);
 
-        if (! $product->is_active || $product->stock < 1) {
-            return back()->with('error', "Maaf, produk '{$product->name}' sedang tidak tersedia.");
+        if (! $product->is_active || $product->stock < 1 || ($product->condition && stripos($product->condition, 'Perawatan') !== false)) {
+            return back()->with('error', "Maaf, produk '{$product->name}' sedang dalam perawatan atau tidak tersedia.");
         }
 
         $cart = session()->get('cart', []);
@@ -232,7 +233,11 @@ class CartController extends Controller
         }
 
         $productIds = array_keys($cart);
-        $products = Product::whereIn('id', $productIds)->where('is_active', true)->get()->keyBy('id');
+        $products = Product::whereIn('id', $productIds)
+            ->where('is_active', true)
+            ->where(fn ($q) => $q->whereNull('condition')->orWhere('condition', 'not like', '%Perawatan%'))
+            ->get()
+            ->keyBy('id');
 
         $validatedItems = [];
         $earliestStart = null;

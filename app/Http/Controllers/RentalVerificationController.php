@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Promotion;
 use App\Models\Rental;
 use App\Models\RentalVerification;
 use App\Services\WhatsAppService;
@@ -9,6 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -95,6 +97,10 @@ class RentalVerificationController extends Controller
             return back()->with('error', 'Pesanan ini belum memiliki data verifikasi dokumen.');
         }
 
+        if (in_array($rental->status, ['completed', 'cancelled'])) {
+            return back()->with('error', 'Status verifikasi dokumen tidak dapat diubah pada pesanan yang sudah selesai atau dibatalkan.');
+        }
+
         $validated = $request->validate([
             'verification_status' => ['required', 'string', 'in:menunggu,disetujui,ditolak,perlu_revisi'],
             'admin_notes' => ['nullable', 'string', 'max:1000'],
@@ -107,12 +113,27 @@ class RentalVerificationController extends Controller
             return back()->with('error', 'Wajib mencantumkan catatan/alasan saat menolak atau meminta revisi dokumen pelanggan.');
         }
 
-        $verification->update([
-            'verification_status' => $validated['verification_status'],
-            'verified_by' => Auth::id(),
-            'verified_at' => Carbon::now(),
-            'admin_notes' => $validated['admin_notes'] ?? null,
-        ]);
+        DB::transaction(function () use ($verification, $rental, $validated): void {
+            $verification->update([
+                'verification_status' => $validated['verification_status'],
+                'verified_by' => Auth::id(),
+                'verified_at' => Carbon::now(),
+                'admin_notes' => $validated['admin_notes'] ?? null,
+            ]);
+
+            if ($validated['verification_status'] === RentalVerification::STATUS_DITOLAK) {
+                if ($rental->promo_code) {
+                    $promo = Promotion::lockForUpdate()->where('code', $rental->promo_code)->first();
+                    if ($promo && $promo->quota_used > 0) {
+                        $promo->decrement('quota_used');
+                    }
+                }
+                $rental->update([
+                    'status' => 'rejected',
+                    'admin_notes' => $validated['admin_notes'],
+                ]);
+            }
+        });
 
         $verification->load(['user', 'rental']);
         WhatsAppService::sendVerificationStatusNotification($verification);
@@ -147,12 +168,23 @@ class RentalVerificationController extends Controller
             'id_card_file.max' => 'Ukuran file KTP maksimal 4MB.',
         ]);
 
+        $oldFile = $verification->id_card_file;
+        if ($oldFile && Storage::disk('local')->exists($oldFile)) {
+            Storage::disk('local')->delete($oldFile);
+        }
+
+        $newPath = $request->file('id_card_file')->store('private/verifications/ktp', 'local');
+
         $updates = [
             'verification_status' => RentalVerification::STATUS_MENUNGGU,
             'verified_by' => null,
             'verified_at' => null,
-            'id_card_file' => $request->file('id_card_file')->store('private/verifications/ktp', 'local'),
+            'id_card_file' => $newPath,
         ];
+
+        if (! empty($validated['notes'])) {
+            $updates['admin_notes'] = 'Catatan revisi penyewa: '.$validated['notes'];
+        }
 
         $verification->update($updates);
 

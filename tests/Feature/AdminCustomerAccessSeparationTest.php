@@ -59,6 +59,10 @@ class AdminCustomerAccessSeparationTest extends TestCase
     {
         $response = $this->actingAs($this->admin)->get(route('admin.dashboard'));
         $response->assertOk();
+        $response->assertSee('Tren omset terverifikasi');
+        $response->assertViewHas('revenueTrendDays');
+        $response->assertViewHas('revenueTrendTotal');
+        $response->assertViewHas('revenueTrendRange');
     }
 
     public function test_admin_can_browse_public_pages(): void

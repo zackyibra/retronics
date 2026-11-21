@@ -57,7 +57,7 @@ class TermsAndPrivacyPolicyTest extends TestCase
             'agree_terms' => '1',
         ]);
 
-        $response->assertRedirect(route('account.index'));
+        $response->assertRedirect(route('home'));
         $this->assertDatabaseHas('users', [
             'email' => 'budisantoso_test@example.com',
             'terms_version' => 'v1.0-2026',

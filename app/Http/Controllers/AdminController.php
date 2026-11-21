@@ -11,7 +11,7 @@ use App\Models\Rental;
 use App\Models\RentalVerification;
 use App\Models\Review;
 use App\Models\User;
-use App\Services\WhatsAppService;
+use App\Services\RentalPaymentService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AdminController extends Controller
 {
@@ -41,31 +42,106 @@ class AdminController extends Controller
         $readyStock = (int) Product::sum('stock');
 
         $activeOrdersCount = Rental::whereIn('status', ['pending_payment', 'waiting_verification', 'confirmed', 'preparing', 'ready_pickup', 'in_use'])->count();
+        $pendingPaymentCount = Rental::where('status', 'pending_payment')->count();
         $pendingVerifications = Rental::where('status', 'waiting_verification')->count();
         $pendingDocVerifications = RentalVerification::where('verification_status', RentalVerification::STATUS_MENUNGGU)->count();
         $pendingReturns = Rental::where('status', 'in_use')->count();
         $overdueRentals = Rental::where('status', 'in_use')->where('end_date', '<', Carbon::today()->toDateString())->count();
+        $ongoingRentals = Rental::whereIn('status', ['confirmed', 'preparing', 'ready_pickup', 'in_use'])->count();
         $actionRequired = $pendingVerifications + $pendingDocVerifications + $pendingReturns;
 
         $voucherUsedCount = Rental::whereNotNull('promo_code')->count();
         $voucherTotalDiscount = (float) Rental::sum('discount_amount');
 
         $stats = [
-            'verified_revenue' => $verifiedRevenue > 0 ? $verifiedRevenue : 12840000,
-            'paid_transactions_count' => $paidTransactionsCount > 0 ? $paidTransactionsCount : 20,
-            'units_in_rent' => $unitsInRent > 0 ? $unitsInRent : 6,
-            'total_physical_stock' => $totalPhysicalStock > 0 ? $totalPhysicalStock : 24,
-            'ready_stock' => $readyStock > 0 ? $readyStock : 17,
-            'maintenance_stock' => 1,
-            'active_orders' => $activeOrdersCount > 0 ? $activeOrdersCount : 5,
-            'action_required' => $actionRequired > 0 ? $actionRequired : 3,
+            'verified_revenue' => $verifiedRevenue,
+            'paid_transactions_count' => $paidTransactionsCount,
+            'units_in_rent' => $unitsInRent,
+            'total_physical_stock' => $totalPhysicalStock,
+            'ready_stock' => $readyStock,
+            'maintenance_stock' => (int) Product::where('condition', 'LIKE', '%Perawatan%')->orWhere('condition', 'LIKE', '%Rusak%')->count(),
+            'active_orders' => $activeOrdersCount,
+            'pending_payment_count' => $pendingPaymentCount,
+            'ongoing_rentals' => $ongoingRentals,
+            'action_required' => $actionRequired,
             'pending_verifications' => $pendingVerifications,
             'pending_doc_verifications' => $pendingDocVerifications,
             'pending_returns' => $pendingReturns,
             'overdue_rentals' => $overdueRentals,
-            'voucher_used_count' => $voucherUsedCount > 0 ? $voucherUsedCount : 8,
-            'voucher_total_discount' => $voucherTotalDiscount > 0 ? $voucherTotalDiscount : 480000,
+            'voucher_used_count' => $voucherUsedCount,
+            'voucher_total_discount' => $voucherTotalDiscount,
         ];
+
+        // Tren omset terverifikasi 7 hari terakhir (nyata sesuai database)
+        $today = Carbon::today();
+        $startDate = $today->copy()->subDays(6);
+        $revenueTrendDays = [];
+        $revenueTrendTotal = 0.0;
+
+        for ($i = 6; $i >= 0; $i--) {
+            $date = $today->copy()->subDays($i);
+            $dateStr = $date->toDateString();
+
+            // Omset terverifikasi pada tanggal ini berdasarkan pembayaran sukses
+            $paymentRevenue = (float) Payment::where('status', Payment::STATUS_SUCCESS)
+                ->where(function ($q) use ($dateStr): void {
+                    $q->whereDate('verified_at', $dateStr)
+                        ->orWhere(function ($sub) use ($dateStr): void {
+                            $sub->whereNull('verified_at')
+                                ->whereDate('payment_date', $dateStr);
+                        });
+                })
+                ->sum('amount');
+
+            // Fallback jika ada pesanan confirmed/completed tanpa record payment khusus
+            $rentalFallbackRevenue = (float) Rental::whereIn('status', ['confirmed', 'preparing', 'ready_pickup', 'in_use', 'completed'])
+                ->whereDoesntHave('payments', fn ($q) => $q->where('status', Payment::STATUS_SUCCESS))
+                ->whereDate('updated_at', $dateStr)
+                ->sum('total_price');
+
+            $dayAmount = $paymentRevenue + $rentalFallbackRevenue;
+            $revenueTrendTotal += $dayAmount;
+
+            $revenueTrendDays[] = [
+                'date' => $dateStr,
+                'date_label' => $date->translatedFormat('d M'),
+                'amount' => $dayAmount,
+                'is_today' => $date->isToday(),
+            ];
+        }
+
+        $maxDailyRevenue = (float) collect($revenueTrendDays)->max('amount');
+
+        $revenueTrendDays = array_map(function (array $item) use ($maxDailyRevenue): array {
+            $amount = $item['amount'];
+
+            if ($amount >= 1000000) {
+                $label = number_format($amount / 1000000, 2, ',', '.').' jt';
+            } elseif ($amount >= 1000) {
+                $label = number_format($amount / 1000, 0, ',', '.').' rb';
+            } elseif ($amount > 0) {
+                $label = 'Rp'.number_format($amount, 0, ',', '.');
+            } else {
+                $label = 'Rp0';
+            }
+
+            if ($maxDailyRevenue > 0 && $amount > 0) {
+                $percentage = max(15, (int) round(($amount / $maxDailyRevenue) * 85));
+            } else {
+                $percentage = 0;
+            }
+
+            $item['label_amount'] = $label;
+            $item['percentage'] = $percentage;
+
+            return $item;
+        }, $revenueTrendDays);
+
+        if ($startDate->isSameMonth($today)) {
+            $revenueTrendRange = $startDate->translatedFormat('j').'–'.$today->translatedFormat('j M Y');
+        } else {
+            $revenueTrendRange = $startDate->translatedFormat('j M').' – '.$today->translatedFormat('j M Y');
+        }
 
         // Antrian kerja store (pending payment verification, pending doc verification, or ongoing rentals)
         $workQueue = Rental::query()
@@ -89,16 +165,7 @@ class AdminController extends Controller
             ->take(4)
             ->get();
 
-        if ($mostRented->isEmpty()) {
-            $mostRented = collect([
-                (object) ['name' => 'Canon EOS R50', 'total_rented' => 12],
-                (object) ['name' => 'Sigma 30mm f/1.4', 'total_rented' => 9],
-                (object) ['name' => 'Sony A7 III', 'total_rented' => 7],
-                (object) ['name' => 'Godox SL60W', 'total_rented' => 5],
-            ]);
-        }
-
-        return view('admin.dashboard', compact('stats', 'workQueue', 'mostRented'));
+        return view('admin.dashboard', compact('stats', 'workQueue', 'mostRented', 'revenueTrendDays', 'revenueTrendTotal', 'revenueTrendRange'));
     }
 
     /* -------------------------------------------------------------
@@ -166,10 +233,50 @@ class AdminController extends Controller
 
     public function products(): View
     {
-        $products = Product::with('category')->latest()->paginate(15);
+        $products = Product::with('category')
+            ->withSum(['rentalItems as rented_quantity' => function ($query): void {
+                $query->whereHas('rental', function ($q): void {
+                    $q->whereIn('status', ['confirmed', 'preparing', 'ready_pickup', 'in_use']);
+                });
+            }], 'quantity')
+            ->latest()
+            ->paginate(15);
+
         $categories = Category::where('is_active', true)->orderBy('name')->get();
 
-        return view('admin.products.index', compact('products', 'categories'));
+        $rentedUnitsTotal = (int) DB::table('rental_items')
+            ->join('rentals', 'rental_items.rental_id', '=', 'rentals.id')
+            ->whereIn('rentals.status', ['confirmed', 'preparing', 'ready_pickup', 'in_use'])
+            ->sum('rental_items.quantity');
+
+        $overdueRentalsCount = (int) Rental::where('status', 'in_use')
+            ->where('end_date', '<', Carbon::today()->toDateString())
+            ->count();
+
+        $maintenanceProducts = Product::where('condition', 'LIKE', '%Perawatan%')
+            ->orWhere('condition', 'LIKE', '%Rusak%')
+            ->get();
+
+        $maintenanceCount = $maintenanceProducts->count();
+        $maintenanceItemsText = $maintenanceProducts->pluck('name')->take(2)->join(', ');
+
+        $totalPhysical = (int) Product::sum('stock') + $rentedUnitsTotal;
+        $availableStock = (int) Product::where(fn ($q) => $q->whereNull('condition')->orWhere('condition', 'not like', '%Perawatan%'))->sum('stock');
+        $readyProductsCount = Product::where('stock', '>', 0)
+            ->where(fn ($q) => $q->whereNull('condition')->orWhere('condition', 'not like', '%Perawatan%'))
+            ->count();
+
+        return view('admin.products.index', compact(
+            'products',
+            'categories',
+            'rentedUnitsTotal',
+            'overdueRentalsCount',
+            'maintenanceCount',
+            'maintenanceItemsText',
+            'totalPhysical',
+            'availableStock',
+            'readyProductsCount'
+        ));
     }
 
     public function storeProduct(Request $request): RedirectResponse
@@ -303,125 +410,35 @@ class AdminController extends Controller
     /**
      * Verifikasi Pembayaran Manual (Valid / Tidak Valid).
      */
-    public function verifyPayment(Request $request, int $id): RedirectResponse
+    public function verifyPayment(Request $request, int $id, RentalPaymentService $paymentService): RedirectResponse
     {
-        $rental = Rental::with(['items.product', 'payments', 'verification'])->findOrFail($id);
+        return DB::transaction(function () use ($request, $id, $paymentService): RedirectResponse {
+            $rental = Rental::with(['items.product', 'payments', 'verification'])
+                ->lockForUpdate()
+                ->findOrFail($id);
 
-        $action = $request->input('action'); // 'approve' or 'reject'
-
-        if ($action === 'approve') {
-            // Proteksi A: Dokumen identitas wajib disetujui sebelum pembayaran disetujui
-            if (! $rental->verification) {
-                return back()->with('error', 'Pembayaran tidak dapat disetujui: Pesanan sewa belum memiliki data dokumen verifikasi identitas.');
+            if ($rental->status !== 'waiting_verification') {
+                return back()->with('error', 'Pembayaran tidak dapat diproses karena status pesanan bukan menunggu verifikasi.');
             }
 
-            if ($rental->verification->verification_status !== RentalVerification::STATUS_DISETUJUI) {
-                if ($rental->verification->verification_status === RentalVerification::STATUS_MENUNGGU && $request->boolean('approve_document')) {
-                    $rental->verification->update([
-                        'verification_status' => RentalVerification::STATUS_DISETUJUI,
-                        'verified_by' => Auth::id(),
-                        'verified_at' => Carbon::now(),
-                        'admin_notes' => 'Disetujui bersamaan dengan verifikasi pembayaran.',
-                    ]);
+            $action = $request->input('action'); // 'approve' or 'reject'
 
-                    $rental->verification->load(['user', 'rental']);
-                    WhatsAppService::sendVerificationStatusNotification($rental->verification);
-                } else {
-                    $statusText = match ($rental->verification->verification_status) {
-                        RentalVerification::STATUS_MENUNGGU => 'masih menunggu verifikasi admin',
-                        RentalVerification::STATUS_PERLU_REVISI => 'membutuhkan revisi dari penyewa',
-                        RentalVerification::STATUS_DITOLAK => 'telah ditolak',
-                        default => 'belum berstatus disetujui sah',
-                    };
-
-                    return back()->with('error', "Pembayaran tidak dapat disetujui: Dokumen identitas pelanggan {$statusText}. Harap periksa dan setujui dokumen verifikasi terlebih dahulu.");
-                }
-            }
-
-            DB::transaction(function () use ($rental, $request): void {
+            if ($action === 'approve') {
                 $notes = $request->input('admin_notes', 'Pembayaran diverifikasi valid oleh admin. Pesanan dikonfirmasi.');
+                $result = $paymentService->approvePayment($rental, null, $notes, $request->boolean('approve_document'));
 
-                // Update or create payment record
-                $payment = $rental->payments()->where('status', Payment::STATUS_WAITING_VERIFICATION)->latest()->first()
-                    ?? $rental->latestPayment;
-
-                if ($payment) {
-                    $payment->update([
-                        'status' => Payment::STATUS_SUCCESS,
-                        'verified_by' => Auth::id(),
-                        'verified_at' => Carbon::now(),
-                        'notes' => $notes,
-                    ]);
-                } else {
-                    Payment::create([
-                        'rental_id' => $rental->id,
-                        'payment_code' => 'PAY-'.date('Ymd').'-'.strtoupper(Str::random(6)),
-                        'amount' => $rental->total_price,
-                        'payment_method' => $rental->payment_method ?? 'transfer_bca',
-                        'payment_date' => Carbon::now(),
-                        'payment_proof' => $rental->payment_proof,
-                        'status' => Payment::STATUS_SUCCESS,
-                        'verified_by' => Auth::id(),
-                        'verified_at' => Carbon::now(),
-                        'notes' => $notes,
-                    ]);
+                if (! $result['success']) {
+                    return back()->with('error', $result['message']);
                 }
 
-                // Check availability of all items & reserve stock
-                foreach ($rental->items as $item) {
-                    $product = $item->product;
-                    if ($product->stock >= $item->quantity) {
-                        $product->decrement('stock', $item->quantity);
-                    }
-                }
+                return back()->with('success', $result['message']);
+            }
 
-                $rental->update([
-                    'status' => 'confirmed',
-                    'admin_notes' => $notes,
-                ]);
-            });
+            $reason = $request->input('rejection_reason') ?? $request->input('admin_notes');
+            $result = $paymentService->rejectPayment($rental, null, $reason);
 
-            return back()->with('success', 'Pembayaran valid! Status penyewaan telah dikonfirmasi dan stok telah direservasi.');
-        } else {
-            $rejectionReason = $request->input('rejection_reason')
-                ?? $request->input('admin_notes', 'Bukti pembayaran tidak valid / kurang lengkap. Mohon upload ulang.');
-
-            DB::transaction(function () use ($rental, $rejectionReason): void {
-                // Update payment record to rejected
-                $payment = $rental->payments()->where('status', Payment::STATUS_WAITING_VERIFICATION)->latest()->first()
-                    ?? $rental->latestPayment;
-
-                if ($payment) {
-                    $payment->update([
-                        'status' => Payment::STATUS_REJECTED,
-                        'verified_by' => Auth::id(),
-                        'verified_at' => Carbon::now(),
-                        'notes' => $rejectionReason,
-                    ]);
-                } else {
-                    Payment::create([
-                        'rental_id' => $rental->id,
-                        'payment_code' => 'PAY-'.date('Ymd').'-'.strtoupper(Str::random(6)),
-                        'amount' => $rental->total_price,
-                        'payment_method' => $rental->payment_method ?? 'transfer_bca',
-                        'payment_date' => Carbon::now(),
-                        'payment_proof' => $rental->payment_proof,
-                        'status' => Payment::STATUS_REJECTED,
-                        'verified_by' => Auth::id(),
-                        'verified_at' => Carbon::now(),
-                        'notes' => $rejectionReason,
-                    ]);
-                }
-
-                // Status penyewaan dikembalikan ke pending_payment agar penyewa dapat mengunggah bukti baru
-                $rental->update([
-                    'status' => 'pending_payment',
-                    'admin_notes' => $rejectionReason,
-                ]);
-            });
-
-            return back()->with('info', 'Status dikembalikan ke menunggu pembayaran dengan catatan untuk penyewa.');
-        }
+            return back()->with('info', $result['message']);
+        });
     }
 
     /**
@@ -438,13 +455,35 @@ class AdminController extends Controller
             return back()->with('error', 'Status alur tidak valid.');
         }
 
-        // Pembatalan transaksi tetap mengikuti aturan pembatalan yang sudah ada
+        // Pembatalan atau penolakan transaksi
         if (in_array($status, ['cancelled', 'rejected'])) {
-            $notes = $request->input('admin_notes');
-            $rental->update([
-                'status' => $status,
-                'admin_notes' => $notes ?? $rental->admin_notes,
-            ]);
+            if ($rental->status === 'completed') {
+                return back()->with('error', 'Pesanan yang sudah selesai (completed) tidak dapat dibatalkan atau ditolak.');
+            }
+
+            DB::transaction(function () use ($rental, $status, $request): void {
+                // Pulihkan stok jika pesanan sebelumnya sudah dikonfirmasi atau diproses
+                if (in_array($rental->status, ['confirmed', 'preparing', 'ready_pickup', 'in_use'])) {
+                    foreach ($rental->items as $item) {
+                        $product = Product::lockForUpdate()->find($item->product_id);
+                        $product?->increment('stock', $item->quantity);
+                    }
+                }
+
+                // Kembalikan kuota promo jika pesanan menggunakan promo
+                if ($rental->promo_code) {
+                    $promo = Promotion::lockForUpdate()->where('code', $rental->promo_code)->first();
+                    if ($promo && $promo->quota_used > 0) {
+                        $promo->decrement('quota_used');
+                    }
+                }
+
+                $notes = $request->input('admin_notes');
+                $rental->update([
+                    'status' => $status,
+                    'admin_notes' => $notes ?? $rental->admin_notes,
+                ]);
+            });
 
             return back()->with('success', "Status pesanan berhasil diubah menjadi: {$rental->status_label}");
         }
@@ -712,6 +751,11 @@ class AdminController extends Controller
     public function markFinePaid(Request $request, int $id): RedirectResponse
     {
         $fine = Fine::findOrFail($id);
+
+        if ($fine->is_paid) {
+            return back()->with('error', 'Denda ini sudah ditandai lunas sebelumnya.');
+        }
+
         $fine->markAsPaid($request->input('reference', 'Pelunasan di Kasir Store'));
 
         return back()->with('success', 'Denda sebesar Rp'.number_format($fine->amount, 0, ',', '.').' berhasil ditandai telah dilunasi.');
@@ -748,27 +792,140 @@ class AdminController extends Controller
      * 6. LAPORAN PENYEWAAN & REKAP OMSET
      * ------------------------------------------------------------- */
 
-    public function reports(Request $request): View
+    public function reports(Request $request): View|StreamedResponse
     {
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
         $status = $request->input('status');
 
-        $query = Rental::with(['user', 'items.product']);
+        $query = Rental::with(['user', 'items.product', 'fines']);
 
         if ($startDate) {
             $query->whereDate('start_date', '>=', $startDate);
         }
         if ($endDate) {
-            $query->whereDate('end_date', '<=', $endDate);
+            $query->whereDate('start_date', '<=', $endDate);
         }
         if ($status) {
             $query->where('status', $status);
         }
 
-        $rentals = (clone $query)->latest()->paginate(20)->withQueryString();
+        $verifiedStatuses = ['confirmed', 'preparing', 'ready_pickup', 'in_use', 'completed'];
 
-        $totalRevenue = (clone $query)->whereIn('status', ['confirmed', 'in_use', 'completed'])->sum('total_price');
+        // 1. Omset Sewa Terverifikasi
+        $verifiedQuery = (clone $query)->whereIn('status', $verifiedStatuses);
+        $totalRevenue = (float) (clone $verifiedQuery)->sum('total_price');
+        $verifiedCount = (clone $verifiedQuery)->count();
+        $avgRevenue = $verifiedCount > 0 ? $totalRevenue / $verifiedCount : 0.0;
+
+        // 2. Voucher Terealisasi
+        $voucherTotalDiscount = (float) (clone $verifiedQuery)->whereNotNull('promo_code')->sum('discount_amount');
+        $voucherUsedCount = (clone $verifiedQuery)->whereNotNull('promo_code')->count();
+
+        // 3. Denda Diterima (Paid Fines)
+        $finesPaidQuery = Fine::where('is_paid', true);
+        if ($startDate) {
+            $finesPaidQuery->whereDate('paid_at', '>=', $startDate);
+        }
+        if ($endDate) {
+            $finesPaidQuery->whereDate('paid_at', '<=', $endDate);
+        }
+        $totalFinesPaid = (float) (clone $finesPaidQuery)->sum('amount');
+        $countFinesPaid = (clone $finesPaidQuery)->count();
+
+        // 4. Denda Belum Lunas (Unpaid Fines)
+        $totalFinesUnpaid = (float) Fine::where('is_paid', false)->sum('amount');
+        $countFinesUnpaid = Fine::where('is_paid', false)->count();
+
+        // Ekspor CSV
+        if ($request->input('export') === 'csv') {
+            $fileDate = ($startDate ?? 'all').'-sd-'.($endDate ?? 'all');
+            $fileName = 'laporan-retronics-'.$fileDate.'.csv';
+            $headers = [
+                'Content-Type' => 'text/csv; charset=UTF-8',
+                'Content-Disposition' => "attachment; filename=\"{$fileName}\"",
+            ];
+
+            $exportRentals = (clone $query)->latest()->get();
+
+            return response()->stream(function () use ($exportRentals): void {
+                $handle = fopen('php://output', 'w');
+                fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+                fputcsv($handle, ['Kode Rental', 'Penyewa', 'Mulai', 'Selesai', 'Status', 'Promo', 'Diskon', 'Total Harga']);
+
+                foreach ($exportRentals as $rental) {
+                    fputcsv($handle, [
+                        $rental->rental_code,
+                        $rental->user->name ?? '-',
+                        $rental->start_date ? $rental->start_date->toDateString() : '-',
+                        $rental->end_date ? $rental->end_date->toDateString() : '-',
+                        $rental->status_label,
+                        $rental->promo_code ?? '-',
+                        $rental->discount_amount,
+                        $rental->total_price,
+                    ]);
+                }
+                fclose($handle);
+            }, 200, $headers);
+        }
+
+        // 5. Tren Penerimaan Sewa per Tanggal
+        $trendData = (clone $verifiedQuery)
+            ->selectRaw('DATE(start_date) as date, SUM(total_price) as revenue, COUNT(*) as count')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        $maxTrendRevenue = (float) $trendData->max('revenue');
+        if ($maxTrendRevenue <= 0) {
+            $maxTrendRevenue = 1.0;
+        }
+
+        // 6. Rekap Terverifikasi per Tanggal / Periode
+        $dailySummary = (clone $verifiedQuery)
+            ->selectRaw('DATE(start_date) as date, COUNT(*) as tx_count, SUM(total_price) as net_revenue')
+            ->groupBy('date')
+            ->orderByDesc('date')
+            ->get()
+            ->map(function ($item) {
+                $finesOnDate = (float) Fine::where('is_paid', true)
+                    ->whereDate('paid_at', $item->date)
+                    ->sum('amount');
+
+                return (object) [
+                    'date' => $item->date,
+                    'formatted_date' => Carbon::parse($item->date)->translatedFormat('d M Y'),
+                    'tx_count' => (int) $item->tx_count,
+                    'net_revenue' => (float) $item->net_revenue,
+                    'fines_paid' => $finesOnDate,
+                    'total_income' => (float) $item->net_revenue + $finesOnDate,
+                ];
+            });
+
+        $totalPeriodicRevenue = (float) $dailySummary->sum('net_revenue');
+        $totalPeriodicFines = (float) $dailySummary->sum('fines_paid');
+        $totalPeriodicIncome = (float) $dailySummary->sum('total_income');
+        $totalPeriodicTx = (int) $dailySummary->sum('tx_count');
+
+        // 7. Penggunaan Voucher
+        $voucherBreakdown = (clone $verifiedQuery)
+            ->whereNotNull('promo_code')
+            ->selectRaw('promo_code, COUNT(*) as used_count, SUM(discount_amount) as total_discount')
+            ->groupBy('promo_code')
+            ->get();
+
+        // 8. Keterlambatan & Denda Detail
+        $lateOrdersCount = Rental::whereHas('fines', fn ($q) => $q->where('type', Fine::TYPE_LATE))
+            ->where('status', 'completed')
+            ->count();
+
+        $unpaidFinesList = Fine::with('rental.user')
+            ->where('is_paid', false)
+            ->latest()
+            ->take(5)
+            ->get();
+
+        $rentals = (clone $query)->latest()->paginate(20)->withQueryString();
         $totalOrders = (clone $query)->count();
         $completedCount = (clone $query)->where('status', 'completed')->count();
         $activeCount = (clone $query)->whereIn('status', ['confirmed', 'in_use'])->count();
@@ -777,6 +934,24 @@ class AdminController extends Controller
         return view('admin.reports.index', compact(
             'rentals',
             'totalRevenue',
+            'verifiedCount',
+            'avgRevenue',
+            'voucherTotalDiscount',
+            'voucherUsedCount',
+            'totalFinesPaid',
+            'countFinesPaid',
+            'totalFinesUnpaid',
+            'countFinesUnpaid',
+            'trendData',
+            'maxTrendRevenue',
+            'dailySummary',
+            'totalPeriodicRevenue',
+            'totalPeriodicFines',
+            'totalPeriodicIncome',
+            'totalPeriodicTx',
+            'voucherBreakdown',
+            'lateOrdersCount',
+            'unpaidFinesList',
             'totalOrders',
             'completedCount',
             'activeCount',
@@ -1033,84 +1208,39 @@ class AdminController extends Controller
     /**
      * Verifikasi atau tolak pembayaran langsung dari daftar pembayaran.
      */
-    public function verifyPaymentDirect(Request $request, int $id): RedirectResponse
+    public function verifyPaymentDirect(Request $request, int $id, RentalPaymentService $paymentService): RedirectResponse
     {
-        $payment = Payment::with('rental.items.product', 'rental.verification')->findOrFail($id);
-        $rental = $payment->rental;
-        $action = $request->input('action'); // 'approve' or 'reject'
+        return DB::transaction(function () use ($request, $id, $paymentService): RedirectResponse {
+            $payment = Payment::with(['rental.items.product', 'rental.verification'])
+                ->lockForUpdate()
+                ->findOrFail($id);
 
-        if ($action === 'approve') {
-            // Proteksi A: Dokumen identitas wajib disetujui sebelum pembayaran disetujui
-            if (! $rental->verification) {
-                return back()->with('error', 'Pembayaran tidak dapat disetujui: Pesanan sewa belum memiliki data dokumen verifikasi identitas.');
+            $rental = $payment->rental;
+
+            if ($payment->status !== Payment::STATUS_WAITING_VERIFICATION || $rental->status !== 'waiting_verification') {
+                return back()->with('error', 'Pembayaran tidak dapat diproses karena status pembayaran atau pesanan bukan menunggu verifikasi.');
             }
 
-            if ($rental->verification->verification_status !== RentalVerification::STATUS_DISETUJUI) {
-                if ($rental->verification->verification_status === RentalVerification::STATUS_MENUNGGU && $request->boolean('approve_document')) {
-                    $rental->verification->update([
-                        'verification_status' => RentalVerification::STATUS_DISETUJUI,
-                        'verified_by' => Auth::id(),
-                        'verified_at' => Carbon::now(),
-                        'admin_notes' => 'Disetujui bersamaan dengan verifikasi pembayaran.',
-                    ]);
+            // Lock the rental record as well
+            Rental::where('id', $rental->id)->lockForUpdate()->first();
 
-                    $rental->verification->load(['user', 'rental']);
-                    WhatsAppService::sendVerificationStatusNotification($rental->verification);
-                } else {
-                    $statusText = match ($rental->verification->verification_status) {
-                        RentalVerification::STATUS_MENUNGGU => 'masih menunggu verifikasi admin',
-                        RentalVerification::STATUS_PERLU_REVISI => 'membutuhkan revisi dari penyewa',
-                        RentalVerification::STATUS_DITOLAK => 'telah ditolak',
-                        default => 'belum berstatus disetujui sah',
-                    };
+            $action = $request->input('action'); // 'approve' or 'reject'
 
-                    return back()->with('error', "Pembayaran tidak dapat disetujui: Dokumen identitas pelanggan {$statusText}. Harap periksa dan setujui dokumen verifikasi terlebih dahulu.");
-                }
-            }
-
-            DB::transaction(function () use ($payment, $rental, $request): void {
+            if ($action === 'approve') {
                 $notes = $request->input('notes', 'Pembayaran diverifikasi valid oleh admin.');
+                $result = $paymentService->approvePayment($rental, $payment, $notes, $request->boolean('approve_document'));
 
-                $payment->update([
-                    'status' => Payment::STATUS_SUCCESS,
-                    'verified_by' => Auth::id(),
-                    'verified_at' => Carbon::now(),
-                    'notes' => $notes,
-                ]);
-
-                foreach ($rental->items as $item) {
-                    $product = $item->product;
-                    if ($product->stock >= $item->quantity) {
-                        $product->decrement('stock', $item->quantity);
-                    }
+                if (! $result['success']) {
+                    return back()->with('error', $result['message']);
                 }
 
-                $rental->update([
-                    'status' => 'confirmed',
-                    'admin_notes' => 'Pembayaran terverifikasi valid.',
-                ]);
-            });
+                return back()->with('success', "Pembayaran {$payment->payment_code} berhasil disetujui. Pesanan dikonfirmasi.");
+            }
 
-            return back()->with('success', "Pembayaran {$payment->payment_code} berhasil disetujui. Pesanan dikonfirmasi.");
-        } else {
-            $rejectionReason = $request->input('rejection_reason')
-                ?? $request->input('notes', 'Bukti pembayaran tidak sesuai atau kurang lengkap.');
-
-            DB::transaction(function () use ($payment, $rental, $rejectionReason): void {
-                $payment->update([
-                    'status' => Payment::STATUS_REJECTED,
-                    'verified_by' => Auth::id(),
-                    'verified_at' => Carbon::now(),
-                    'notes' => $rejectionReason,
-                ]);
-
-                $rental->update([
-                    'status' => 'pending_payment',
-                    'admin_notes' => $rejectionReason,
-                ]);
-            });
+            $reason = $request->input('rejection_reason') ?? $request->input('notes');
+            $result = $paymentService->rejectPayment($rental, $payment, $reason);
 
             return back()->with('info', "Pembayaran {$payment->payment_code} ditolak. Penyewa dapat mengajukan ulang bukti pembayaran.");
-        }
+        });
     }
 }

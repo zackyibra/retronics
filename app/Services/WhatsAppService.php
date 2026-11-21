@@ -37,7 +37,7 @@ class WhatsAppService
     public static function sendMessage(string $targetPhone, string $message): array
     {
         $formattedPhone = self::formatPhoneNumber($targetPhone);
-        $token = env('FONNTE_TOKEN', config('services.fonnte.token'));
+        $token = config('services.fonnte.token');
 
         if (empty($token) || app()->environment('testing')) {
             $sanitizedMessage = preg_replace('/\b\d{6}\b/', '******', $message);
@@ -85,22 +85,6 @@ class WhatsAppService
                 'simulated' => false,
             ];
         }
-    }
-
-    /**
-     * Kirimkan pesan kode OTP verifikasi ke nomor WhatsApp pengguna.
-     *
-     * @return array{success: bool, message: string, simulated: bool}
-     */
-    public static function sendOtp(string $targetPhone, string $otpCode, string $userName = 'Pelanggan'): array
-    {
-        $message = "Halo *{$userName}*,\n\n"
-                 ."Berikut adalah kode verifikasi OTP pemulihan akun *Retronics – Rental Fotografi* Anda:\n\n"
-                 ."*{$otpCode}*\n\n"
-                 ."Kode ini berlaku selama *5 menit*. Jangan bagikan kode ini kepada siapa pun termasuk pihak Retronics demi keamanan akun Anda.\n\n"
-                 .'Jika Anda tidak merasa meminta kode ini, abaikan pesan ini.';
-
-        return self::sendMessage($targetPhone, $message);
     }
 
     /**

@@ -39,7 +39,7 @@
             </p>
             <ul class="list-disc list-inside space-y-1.5 pl-2 text-slate-600">
                 <li>Mengisi data diri asli dan akurat (nama lengkap sesuai KTP, alamat email aktif, nomor WhatsApp yang dapat dihubungi, dan domisili aktual).</li>
-                <li>Menjaga kerahasiaan kata sandi dan kode verifikasi akun (*One-Time Password / OTP*). Segala aktivitas yang terjadi melalui akun terdaftar merupakan tanggung jawab penuh pemilik akun.</li>
+                <li>Menjaga kerahasiaan kata sandi akun. Segala aktivitas yang terjadi melalui akun terdaftar merupakan tanggung jawab penuh pemilik akun.</li>
                 <li>Tidak memindahtangankan, memperjualbelikan, atau meminjamkan akun pengguna kepada pihak lain tanpa persetujuan tertulis dari pihak Retronics.</li>
             </ul>
         </section>

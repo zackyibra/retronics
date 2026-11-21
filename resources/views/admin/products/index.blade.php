@@ -12,6 +12,7 @@
 <div class="space-y-6"
      x-data="{
         selectedId: {{ $selectedProduct ? $selectedProduct->id : 'null' }},
+        createProductModalOpen: false,
         deletePhotoModalOpen: false,
         deletePhotoReason: '',
         editor: {
@@ -46,13 +47,13 @@
         </p>
     </div>
 
-    <!-- 4 Metric Cards (Matching Figma Screenshot) -->
+    <!-- 4 Metric Cards (Data Nyata dari Database) -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- 1. Unit fisik -->
         <div class="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-1">
             <span class="text-xs text-slate-500 font-medium block">Unit fisik</span>
             <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-display">
-                {{ $totalStock > 0 ? $totalStock : 24 }}
+                {{ $totalPhysical ?? $totalStock }}
             </div>
             <span class="text-[11px] text-brand-600 font-semibold block">{{ $products->total() }} model gear terdaftar</span>
         </div>
@@ -61,27 +62,29 @@
         <div class="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-1">
             <span class="text-xs text-slate-500 font-medium block">Tersedia</span>
             <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-display">
-                {{ $totalStock > 0 ? $totalStock - 6 : 17 }}
+                {{ $availableStock ?? $totalStock }}
             </div>
-            <span class="text-[11px] text-brand-600 font-semibold block">{{ $readyCount }} model siap sewa</span>
+            <span class="text-[11px] text-brand-600 font-semibold block">{{ $readyProductsCount ?? $readyCount }} model siap sewa</span>
         </div>
 
         <!-- 3. Sedang disewa -->
         <div class="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-1">
             <span class="text-xs text-slate-500 font-medium block">Sedang disewa</span>
             <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-display">
-                6
+                {{ $rentedUnitsTotal ?? 0 }}
             </div>
-            <span class="text-[11px] text-slate-400 font-semibold block">Termasuk 2 unit terlambat</span>
+            <span class="text-[11px] text-slate-400 font-semibold block">{{ ($overdueRentalsCount ?? 0) > 0 ? "Termasuk {$overdueRentalsCount} unit terlambat" : 'Semua sewa dalam jadwal normal' }}</span>
         </div>
 
         <!-- 4. Perawatan -->
         <div class="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-1">
             <span class="text-xs text-slate-500 font-medium block">Perawatan</span>
             <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-display">
-                1
+                {{ $maintenanceCount ?? 0 }}
             </div>
-            <span class="text-[11px] text-brand-600 font-semibold block">RØDE VideoMicro</span>
+            <span class="text-[11px] text-brand-600 font-semibold block truncate" title="{{ $maintenanceItemsText ?? 'Tidak ada unit perawatan' }}">
+                {{ !empty($maintenanceItemsText) ? $maintenanceItemsText : 'Tidak ada unit perawatan' }}
+            </span>
         </div>
     </div>
 
@@ -125,8 +128,9 @@
         </div>
 
         <button type="button"
-                onclick="document.getElementById('product-form-container').scrollIntoView({behavior: 'smooth'});"
-                class="px-5 py-3.5 rounded-2xl font-bold text-xs sm:text-sm text-white bg-brand-600 hover:bg-brand-700 shadow-md shadow-brand-500/20 transition self-start sm:self-auto flex items-center gap-1.5 flex-shrink-0">
+                @click="createProductModalOpen = true"
+                class="px-5 py-3.5 rounded-2xl font-bold text-xs sm:text-sm text-white bg-brand-600 hover:bg-brand-700 shadow-md shadow-brand-500/20 transition self-start sm:self-auto flex items-center gap-1.5 flex-shrink-0 cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
             <span>+ Tambah Barang</span>
         </button>
     </div>
@@ -147,6 +151,13 @@
             </thead>
             <tbody class="divide-y divide-slate-100">
                 @foreach($products as $product)
+                    @php
+                        $rented = (int) ($product->rented_quantity ?? 0);
+                        $isMaint = $product->condition && stripos($product->condition, 'Perawatan') !== false;
+                        $maintenance = $isMaint ? $product->stock : 0;
+                        $available = $isMaint ? 0 : $product->stock;
+                        $physical = $product->stock + $rented;
+                    @endphp
                     <tr class="hover:bg-slate-50/70 transition cursor-pointer"
                         :class="selectedId === {{ $product->id }} ? 'bg-blue-50/40' : ''"
                         @click="selectedId = {{ $product->id }};
@@ -180,18 +191,52 @@
                             Rp{{ number_format($product->price_per_day, 0, ',', '.') }}
                         </td>
                         <td class="py-4 text-slate-600">
-                            {{ $product->stock + 1 }} / {{ $product->stock }}
+                            <span class="font-bold text-slate-800">{{ $physical }}</span> / <span class="{{ $available > 0 ? 'text-emerald-600 font-semibold' : 'text-slate-400' }}">{{ $available }}</span>
                         </td>
                         <td class="py-4 text-slate-600">
-                            {{ $product->stock > 0 ? '1 / 0' : '0 / 0' }}
+                            <span class="{{ $rented > 0 ? 'text-brand-600 font-semibold' : 'text-slate-500' }}">{{ $rented }}</span> / <span class="{{ $maintenance > 0 ? 'text-amber-600 font-semibold' : 'text-slate-400' }}">{{ $maintenance }}</span>
                         </td>
                         <td class="py-4 text-slate-700">
-                            {{ $product->condition ?? 'Mulus 99%' }}
+                            @if($isMaint)
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                    {{ $product->condition }}
+                                </span>
+                            @else
+                                {{ $product->condition ?? 'Mulus 99%' }}
+                            @endif
                         </td>
-                        <td class="py-4 text-right">
-                            <span class="text-xs font-bold text-brand-600 hover:text-brand-700">
-                                Ubah · Foto
-                            </span>
+                        <td class="py-4 text-right" @click.stop>
+                            <div class="inline-flex items-center gap-2 justify-end">
+                                <button type="button"
+                                        @click="selectedId = {{ $product->id }};
+                                                editor.id = {{ $product->id }};
+                                                editor.name = '{{ addslashes($product->name) }}';
+                                                editor.categoryId = {{ $product->category_id }};
+                                                editor.price = {{ (int)$product->price_per_day }};
+                                                editor.stock = {{ (int)$product->stock }};
+                                                editor.condition = '{{ addslashes($product->condition ?? 'Mulus 99%') }}';
+                                                editor.description = '{{ addslashes($product->description ?? '') }}';
+                                                editor.isActive = {{ $product->is_active ? 'true' : 'false' }};
+                                                editor.hasImage = {{ !empty($product->image) ? 'true' : 'false' }};
+                                                editor.imageFilename = '{{ !empty($product->image) ? basename($product->image) : '' }}';
+                                                editor.image = '{{ $product->image ? (str_starts_with($product->image, 'http') ? $product->image : asset('storage/' . $product->image)) : 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=600&q=80' }}';
+                                                document.getElementById('product-form-container').scrollIntoView({behavior: 'smooth'});"
+                                        class="text-xs font-bold text-brand-600 hover:text-brand-700">
+                                    Ubah
+                                </button>
+                                <span class="text-slate-300">·</span>
+                                <form method="POST"
+                                      action="{{ route('admin.products.destroy', $product->id) }}"
+                                      onsubmit="return confirm('Apakah Anda yakin ingin menghapus barang \'{{ addslashes($product->name) }}\' dari inventaris?');"
+                                      class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit"
+                                            class="text-xs font-bold text-rose-600 hover:text-rose-700">
+                                        Hapus
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 @endforeach
@@ -426,6 +471,144 @@
                     <button type="submit"
                             class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md shadow-rose-600/20 transition">
                         Hapus Foto Ini
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Tambah Barang Baru -->
+    <div x-show="createProductModalOpen"
+         class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
+         @click="createProductModalOpen = false"
+         style="display: none;">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-2xl w-full space-y-6 shadow-2xl border border-slate-200 my-8"
+             @click.stop>
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-brand-50 border border-brand-200 text-brand-600 flex items-center justify-center font-bold text-lg shrink-0">
+                        📦
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-extrabold text-slate-900 font-display">
+                            Tambah Barang Baru
+                        </h3>
+                        <p class="text-xs text-slate-500">
+                            Daftarkan unit gear baru ke dalam katalog dan inventaris Retronics.
+                        </p>
+                    </div>
+                </div>
+                <button type="button"
+                        @click="createProductModalOpen = false"
+                        class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center text-sm font-bold transition">
+                    ✕
+                </button>
+            </div>
+
+            <form method="POST" action="{{ route('admin.products.store') }}" enctype="multipart/form-data" class="space-y-4">
+                @csrf
+
+                <!-- Row 1: Nama Barang & Kategori -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/50 focus-within:border-brand-500 focus-within:bg-white transition">
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                            Nama Barang <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="text"
+                               name="name"
+                               required
+                               placeholder="Cth: Sony FX30 Cinema"
+                               class="w-full bg-transparent text-sm font-bold text-slate-900 focus:outline-none">
+                    </div>
+
+                    <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/50 focus-within:border-brand-500 focus-within:bg-white transition">
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                            Kategori <span class="text-rose-500">*</span>
+                        </label>
+                        <select name="category_id"
+                                required
+                                class="w-full bg-transparent text-sm font-bold text-slate-900 focus:outline-none cursor-pointer">
+                            <option value="">-- Pilih Kategori --</option>
+                            @foreach($categories as $cat)
+                                <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Row 2: Tarif Harian, Stok Fisik, Kondisi -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/50 focus-within:border-brand-500 focus-within:bg-white transition">
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                            Tarif Harian (Rp) <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="number"
+                               name="price_per_day"
+                               min="0"
+                               step="1000"
+                               required
+                               placeholder="Cth: 250000"
+                               class="w-full bg-transparent text-sm font-bold text-slate-900 focus:outline-none">
+                    </div>
+
+                    <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/50 focus-within:border-brand-500 focus-within:bg-white transition">
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                            Stok Fisik Unit <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="number"
+                               name="stock"
+                               min="0"
+                               required
+                               placeholder="Cth: 3"
+                               class="w-full bg-transparent text-sm font-bold text-slate-900 focus:outline-none">
+                    </div>
+
+                    <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/50 focus-within:border-brand-500 focus-within:bg-white transition">
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                            Kondisi Unit <span class="text-rose-500">*</span>
+                        </label>
+                        <select name="condition"
+                                required
+                                class="w-full bg-transparent text-sm font-bold text-slate-900 focus:outline-none cursor-pointer">
+                            <option value="Mulus 99%">Mulus 99%</option>
+                            <option value="Normal">Normal</option>
+                            <option value="Perawatan">Perawatan</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Row 3: Deskripsi & Kelengkapan (Opsional) -->
+                <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/50 focus-within:border-brand-500 focus-within:bg-white transition">
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                        Spesifikasi & Kelengkapan <span class="text-slate-400 font-normal">(Opsional)</span>
+                    </label>
+                    <textarea name="description"
+                              rows="3"
+                              placeholder="Cth: Termasuk 2 baterai original, charger ganda, strap, dan case anti guncang..."
+                              class="w-full bg-transparent text-xs text-slate-800 leading-relaxed focus:outline-none resize-none"></textarea>
+                </div>
+
+                <!-- Row 4: Upload Foto Barang (Opsional) -->
+                <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/50">
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                        Foto Barang <span class="text-slate-400 font-normal">(Opsional, JPG/PNG maks. 2 MB)</span>
+                    </label>
+                    <input type="file"
+                           name="image"
+                           accept="image/*"
+                           class="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 cursor-pointer">
+                </div>
+
+                <!-- Tombol Aksi Modal -->
+                <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                    <button type="button"
+                            @click="createProductModalOpen = false"
+                            class="px-5 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-50 transition">
+                        Batal
+                    </button>
+                    <button type="submit"
+                            class="px-6 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-500/20 transition flex items-center gap-1.5">
+                        <span>Simpan Barang Baru</span>
                     </button>
                 </div>
             </form>

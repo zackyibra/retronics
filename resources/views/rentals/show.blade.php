@@ -468,7 +468,7 @@
                     </div>
                 @endif
 
-                @if(in_array($rental->status, ['pending_payment', 'waiting_verification']))
+                @if($rental->status === 'pending_payment')
                     <form method="POST" action="{{ route('rentals.pay', $rental->id) }}" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="payment_method" :value="selectedMethod">

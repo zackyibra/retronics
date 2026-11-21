@@ -40,6 +40,25 @@
             }
         }
     </script>
+    <style>
+        .custom-sidebar-scroll::-webkit-scrollbar {
+            width: 5px;
+        }
+        .custom-sidebar-scroll::-webkit-scrollbar-track {
+            background: #0b1320;
+        }
+        .custom-sidebar-scroll::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        .custom-sidebar-scroll::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+        .custom-sidebar-scroll {
+            scrollbar-width: thin;
+            scrollbar-color: #1e293b #0b1320;
+        }
+    </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex" x-data="{ mobileMenuOpen: false }">
 
@@ -52,10 +71,10 @@
     @endphp
 
     <!-- Fixed Dark Navy Left Sidebar (Matching Figma Screenshot) -->
-    <aside class="w-64 bg-[#0b1320] text-slate-300 flex-shrink-0 flex flex-col justify-between min-h-screen fixed left-0 top-0 bottom-0 z-40 hidden lg:flex border-r border-slate-900">
-        <div>
+    <aside class="w-64 bg-[#0b1320] text-slate-300 flex-shrink-0 flex flex-col justify-between h-screen fixed left-0 top-0 bottom-0 z-40 hidden lg:flex border-r border-slate-900">
+        <div class="flex-1 overflow-y-auto overscroll-contain custom-sidebar-scroll">
             <!-- Brand Logo -->
-            <div class="p-6">
+            <div class="p-6 sticky top-0 bg-[#0b1320] z-10">
                 <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3">
                     <img src="{{ asset('images/logo.jpg') }}" alt="Logo Retronics" class="w-9 h-9 object-contain rounded-xl border border-slate-700 bg-white shadow-md">
                     <div>
@@ -70,7 +89,7 @@
             </div>
 
             <!-- Navigation Links -->
-            <nav class="px-3 space-y-1 text-xs font-semibold">
+            <nav class="px-3 pb-6 space-y-1 text-xs font-semibold">
                 <a href="{{ route('admin.dashboard') }}"
                    class="flex items-center px-4 py-3 rounded-xl transition {{ request()->routeIs('admin.dashboard') ? 'bg-brand-600 text-white font-bold shadow-md shadow-brand-600/30' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
                     <span>Dashboard</span>
@@ -126,6 +145,11 @@
                     <span>Pelanggan</span>
                 </a>
 
+                <a href="{{ route('admin.reviews.index') }}"
+                   class="flex items-center px-4 py-3 rounded-xl transition {{ request()->routeIs('admin.reviews.*') ? 'bg-brand-600 text-white font-bold shadow-md shadow-brand-600/30' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+                    <span>Ulasan Pelanggan</span>
+                </a>
+
                 <a href="{{ route('admin.reports.index') }}"
                    class="flex items-center px-4 py-3 rounded-xl transition {{ request()->routeIs('admin.reports.*') ? 'bg-brand-600 text-white font-bold shadow-md shadow-brand-600/30' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
                     <span>Laporan Bisnis</span>
@@ -144,7 +168,7 @@
         </div>
 
         <!-- Bottom Actions (Matching Screenshot) -->
-        <div class="p-4 border-t border-slate-900 space-y-1 text-xs">
+        <div class="p-4 border-t border-slate-900 space-y-1 text-xs shrink-0 bg-[#0b1320] z-20">
             <a href="{{ route('home') }}"
                target="_blank"
                class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition">
@@ -196,31 +220,49 @@
              class="lg:hidden fixed inset-0 z-50 bg-black/50"
              @click="mobileMenuOpen = false"
              style="display: none;">
-            <div class="w-64 bg-[#0b1320] h-full p-6 text-slate-300 space-y-4" @click.stop>
-                <div class="flex items-center justify-between">
-                    <span class="font-display font-bold text-white text-lg">retronics</span>
-                    <button type="button" @click="mobileMenuOpen = false" class="text-slate-400 hover:text-white">✕</button>
+            <div class="w-64 bg-[#0b1320] h-full p-6 text-slate-300 flex flex-col justify-between" @click.stop>
+                <div class="flex-1 overflow-y-auto overscroll-contain custom-sidebar-scroll space-y-4 pr-1">
+                    <div class="flex items-center justify-between pb-2">
+                        <span class="font-display font-bold text-white text-lg">retronics</span>
+                        <button type="button" @click="mobileMenuOpen = false" class="text-slate-400 hover:text-white text-lg">✕</button>
+                    </div>
+                    <nav class="space-y-1 text-xs font-semibold">
+                        <a href="{{ route('admin.dashboard') }}" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/5">Dashboard</a>
+                        <a href="{{ route('admin.categories.index') }}" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/5">Kategori</a>
+                        <a href="{{ route('admin.products.index') }}" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/5">Barang</a>
+                        <a href="{{ route('admin.rentals.index') }}" class="flex items-center justify-between px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/5">
+                            <span>Penyewaan</span>
+                            @if($totalRentalAlerts > 0)
+                                <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300">
+                                    {{ $totalRentalAlerts }}
+                                </span>
+                            @endif
+                        </a>
+                        <a href="{{ route('admin.payments.index') }}" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/5">Pembayaran</a>
+                        <a href="{{ route('admin.returns.index') }}" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/5">Pengembalian & Denda</a>
+                        <a href="{{ route('admin.promotions.index') }}" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/5">Kelola Promo</a>
+                        <a href="{{ route('admin.customers.index') }}" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/5">Pelanggan</a>
+                        <a href="{{ route('admin.reviews.index') }}" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/5">Ulasan Pelanggan</a>
+                        <a href="{{ route('admin.reports.index') }}" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/5">Laporan Bisnis</a>
+                        <a href="{{ route('admin.qris.index') }}" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/5">Pengaturan QRIS</a>
+                        <a href="{{ route('admin.files.audit_logs') }}" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/5">Audit Log Berkas</a>
+                    </nav>
                 </div>
-                <nav class="space-y-1 text-xs font-semibold">
-                    <a href="{{ route('admin.dashboard') }}" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/5">Dashboard</a>
-                    <a href="{{ route('admin.categories.index') }}" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/5">Kategori</a>
-                    <a href="{{ route('admin.products.index') }}" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/5">Barang</a>
-                    <a href="{{ route('admin.rentals.index') }}" class="flex items-center justify-between px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/5">
-                        <span>Penyewaan</span>
-                        @if($totalRentalAlerts > 0)
-                            <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300">
-                                {{ $totalRentalAlerts }}
-                            </span>
-                        @endif
+
+                <div class="pt-4 border-t border-slate-900 space-y-1 text-xs shrink-0">
+                    <a href="{{ route('home') }}"
+                       target="_blank"
+                       class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition">
+                        <span>↗ Lihat website publik</span>
                     </a>
-                    <a href="{{ route('admin.payments.index') }}" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/5">Pembayaran</a>
-                    <a href="{{ route('admin.returns.index') }}" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/5">Pengembalian & Denda</a>
-                    <a href="{{ route('admin.promotions.index') }}" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/5">Kelola Promo</a>
-                    <a href="{{ route('admin.customers.index') }}" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/5">Pelanggan</a>
-                    <a href="{{ route('admin.reports.index') }}" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/5">Laporan Bisnis</a>
-                    <a href="{{ route('admin.qris.index') }}" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/5">Pengaturan QRIS</a>
-                    <a href="{{ route('admin.files.audit_logs') }}" class="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/5">Audit Log Berkas</a>
-                </nav>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit"
+                                class="w-full text-left px-3 py-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition">
+                            Keluar dari admin
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
 

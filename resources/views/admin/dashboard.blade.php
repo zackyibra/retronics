@@ -59,7 +59,7 @@
                 {{ $stats['active_orders'] }}
             </div>
             <span class="text-[11px] text-slate-400 font-medium block">
-                1 bayar · 1 verifikasi · 3 berjalan
+                {{ $stats['pending_payment_count'] }} bayar · {{ $stats['pending_verifications'] }} verifikasi · {{ $stats['ongoing_rentals'] }} berjalan
             </span>
         </div>
 
@@ -115,63 +115,30 @@
                     <h2 class="text-lg font-bold text-slate-900 font-display">
                         Tren omset terverifikasi
                     </h2>
-                    <span class="text-xs text-slate-400">Rp2,5 jt</span>
+                    <span class="text-xs text-slate-400">
+                        Rp{{ number_format($revenueTrendTotal, 0, ',', '.') }}
+                    </span>
                 </div>
                 <span class="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600">
-                    18–24 {{ \Carbon\Carbon::now()->translatedFormat('M Y') }}
+                    {{ $revenueTrendRange }}
                 </span>
             </div>
 
-            <!-- CSS Bar Chart (Faithfully matching Figma screenshot) -->
+            <!-- CSS Bar Chart (Dinamis dari Omset Nyata Database) -->
             <div class="h-48 flex items-end justify-between gap-2 sm:gap-4 px-2 pt-6 pb-2 border-b border-slate-100">
-                <!-- Day 1: 18 Okt -->
-                <div class="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
-                    <span class="text-[10px] text-slate-400 font-bold">0,90 jt</span>
-                    <div class="w-full max-w-[48px] bg-brand-600 rounded-t-xl transition-all hover:bg-brand-700" style="height: 36%;"></div>
-                    <span class="text-[11px] font-semibold text-slate-600 mt-1">18 Okt</span>
-                </div>
-
-                <!-- Day 2: 19 Okt -->
-                <div class="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
-                    <span class="text-[10px] text-slate-400 font-bold">1,20 jt</span>
-                    <div class="w-full max-w-[48px] bg-brand-600 rounded-t-xl transition-all hover:bg-brand-700" style="height: 48%;"></div>
-                    <span class="text-[11px] font-semibold text-slate-600 mt-1">19 Okt</span>
-                </div>
-
-                <!-- Day 3: 20 Okt -->
-                <div class="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
-                    <span class="text-[10px] text-slate-400 font-bold">1,30 jt</span>
-                    <div class="w-full max-w-[48px] bg-brand-600 rounded-t-xl transition-all hover:bg-brand-700" style="height: 52%;"></div>
-                    <span class="text-[11px] font-semibold text-slate-600 mt-1">20 Okt</span>
-                </div>
-
-                <!-- Day 4: 21 Okt -->
-                <div class="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
-                    <span class="text-[10px] text-slate-400 font-bold">1,60 jt</span>
-                    <div class="w-full max-w-[48px] bg-brand-600 rounded-t-xl transition-all hover:bg-brand-700" style="height: 64%;"></div>
-                    <span class="text-[11px] font-semibold text-slate-600 mt-1">21 Okt</span>
-                </div>
-
-                <!-- Day 5: 22 Okt -->
-                <div class="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
-                    <span class="text-[10px] text-slate-400 font-bold">2,20 jt</span>
-                    <div class="w-full max-w-[48px] bg-brand-600 rounded-t-xl transition-all hover:bg-brand-700" style="height: 88%;"></div>
-                    <span class="text-[11px] font-semibold text-slate-600 mt-1">22 Okt</span>
-                </div>
-
-                <!-- Day 6: 23 Okt -->
-                <div class="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
-                    <span class="text-[10px] text-slate-400 font-bold">1,95 jt</span>
-                    <div class="w-full max-w-[48px] bg-brand-600 rounded-t-xl transition-all hover:bg-brand-700" style="height: 78%;"></div>
-                    <span class="text-[11px] font-semibold text-slate-600 mt-1">23 Okt</span>
-                </div>
-
-                <!-- Day 7: 24 Okt (Current/Darker) -->
-                <div class="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
-                    <span class="text-[10px] text-slate-400 font-bold">1,49 jt</span>
-                    <div class="w-full max-w-[48px] bg-[#0b1320] rounded-t-xl transition-all hover:bg-slate-900" style="height: 60%;"></div>
-                    <span class="text-[11px] font-semibold text-slate-900 mt-1">24 Okt</span>
-                </div>
+                @foreach($revenueTrendDays as $day)
+                    <div class="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group">
+                        <span class="text-[10px] {{ $day['amount'] > 0 ? 'text-slate-800 font-bold' : 'text-slate-400 font-medium' }} whitespace-nowrap">
+                            {{ $day['label_amount'] }}
+                        </span>
+                        <div class="w-full max-w-[48px] {{ $day['amount'] > 0 ? ($day['is_today'] ? 'bg-[#0b1320] hover:bg-slate-900' : 'bg-brand-600 hover:bg-brand-700') : 'bg-slate-100 hover:bg-slate-200' }} rounded-t-xl transition-all duration-300"
+                             style="height: {{ max(4, $day['percentage']) }}%;"
+                             title="{{ $day['date_label'] }}: Rp{{ number_format($day['amount'], 0, ',', '.') }}"></div>
+                        <span class="text-[11px] font-semibold {{ $day['is_today'] ? 'text-slate-900 font-extrabold' : 'text-slate-600' }} mt-1 whitespace-nowrap">
+                            {{ $day['date_label'] }}
+                        </span>
+                    </div>
+                @endforeach
             </div>
 
             <p class="text-[11px] text-slate-400 mt-4">

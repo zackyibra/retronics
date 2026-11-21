@@ -110,7 +110,7 @@
             </div>
 
             <!-- Customer Reviews Section -->
-            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm">
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm min-w-0 overflow-hidden" id="review-section">
                 <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
                     <div>
                         <h2 class="text-lg font-bold text-slate-900 font-display flex items-center gap-2">
@@ -135,31 +135,60 @@
                 <!-- Review Submission Form (if eligible) -->
                 @auth
                     @if ($canReview)
-                        <div class="bg-blue-50/70 border border-blue-200/80 rounded-2xl p-5 mb-6">
+                        <div class="bg-blue-50/70 border border-blue-200/80 rounded-2xl p-5 mb-6"
+                             x-data="{
+                                 rating: {{ old('rating', 5) }},
+                                 hoverRating: 0,
+                                 labels: {
+                                     1: '★ 1/5 - Sangat Kurang',
+                                     2: '★ 2/5 - Kurang Memuaskan',
+                                     3: '★ 3/5 - Cukup Baik',
+                                     4: '★ 4/5 - Sangat Bagus',
+                                     5: '★ 5/5 - Luar Biasa (Bintang 5)!'
+                                 }
+                             }">
                             <h3 class="font-bold text-slate-900 text-xs uppercase tracking-wider mb-3">✍️ Tulis Pengalaman Sewa Anda</h3>
                             <form method="POST" action="{{ route('reviews.store', $product->id) }}">
                                 @csrf
                                 <div class="mb-3">
-                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Rating Bintang:</label>
-                                    <div class="flex items-center gap-1" id="star-rating">
+                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Rating Bintang: <span class="text-rose-500">*</span></label>
+                                    <div class="flex items-center gap-1.5 flex-wrap" @mouseleave="hoverRating = 0">
                                         @for ($i = 1; $i <= 5; $i++)
-                                            <label class="cursor-pointer">
-                                                <input type="radio" name="rating" value="{{ $i }}" class="sr-only" required>
-                                                <span class="text-2xl text-slate-300 hover:text-amber-400 transition star-btn" data-value="{{ $i }}">★</span>
+                                            <label class="cursor-pointer transition-transform hover:scale-125 active:scale-95"
+                                                   @mouseenter="hoverRating = {{ $i }}"
+                                                   @click="rating = {{ $i }}">
+                                                <input type="radio"
+                                                       name="rating"
+                                                       value="{{ $i }}"
+                                                       x-model.number="rating"
+                                                       class="sr-only"
+                                                       required>
+                                                <span class="text-3xl transition-colors select-none"
+                                                      :class="(hoverRating || rating) >= {{ $i }} ? 'text-amber-400' : 'text-slate-300'">
+                                                    ★
+                                                </span>
                                             </label>
                                         @endfor
+                                        <span class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 border border-amber-200/60 ml-2"
+                                              x-text="(hoverRating || rating) ? labels[hoverRating || rating] : 'Pilih bintang penilaian'"></span>
                                     </div>
+                                    @error('rating')
+                                        <p class="text-rose-600 text-[11px] mt-1">{{ $message }}</p>
+                                    @enderror
                                 </div>
 
                                 <div class="mb-3">
                                     <textarea name="comment"
-                                              rows="2"
+                                              rows="3"
                                               placeholder="Bagaimana kondisi gear dan layanan selama penyewaan?..."
                                               required
                                               class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none"></textarea>
+                                    @error('comment')
+                                        <p class="text-rose-600 text-[11px] mt-1">{{ $message }}</p>
+                                    @enderror
                                 </div>
 
-                                <button type="submit" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs transition shadow-xs">
+                                <button type="submit" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs transition shadow-sm">
                                     Kirim Ulasan
                                 </button>
                             </form>
@@ -181,21 +210,21 @@
                 @else
                     <div class="space-y-3.5">
                         @foreach ($reviews as $rev)
-                            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-6 h-6 rounded-full bg-brand-100 text-brand-700 font-bold text-[10px] flex items-center justify-center">
+                            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100 min-w-0 overflow-hidden">
+                                <div class="flex items-center justify-between mb-1.5 gap-2">
+                                    <div class="flex items-center gap-2 min-w-0">
+                                        <div class="w-6 h-6 shrink-0 rounded-full bg-brand-100 text-brand-700 font-bold text-[10px] flex items-center justify-center">
                                             {{ substr($rev->user->name ?? 'U', 0, 1) }}
                                         </div>
-                                        <span class="text-xs font-bold text-slate-800">{{ $rev->user->name ?? 'Penyewa' }}</span>
+                                        <span class="text-xs font-bold text-slate-800 truncate">{{ $rev->user->name ?? 'Penyewa' }}</span>
                                     </div>
-                                    <div class="flex items-center text-amber-400 text-xs">
+                                    <div class="flex items-center text-amber-400 text-xs shrink-0">
                                         @for ($s = 1; $s <= 5; $s++)
                                             <span>{{ $s <= $rev->rating ? '★' : '☆' }}</span>
                                         @endfor
                                     </div>
                                 </div>
-                                <p class="text-xs text-slate-600 leading-relaxed">{{ $rev->comment }}</p>
+                                <p class="text-xs text-slate-600 leading-relaxed break-words break-all whitespace-pre-line overflow-hidden">{{ $rev->comment }}</p>
                                 <span class="text-[10px] text-slate-400 block mt-1">{{ $rev->created_at->diffForHumans() }}</span>
                             </div>
                         @endforeach

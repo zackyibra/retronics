@@ -13,6 +13,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -37,6 +38,7 @@ class RentalController extends Controller
             ->with('category')
             ->where('is_active', true)
             ->where('stock', '>', 0)
+            ->where(fn ($q) => $q->whereNull('condition')->orWhere('condition', 'not like', '%Perawatan%'))
             ->orderBy('name')
             ->get();
 
@@ -122,7 +124,7 @@ class RentalController extends Controller
             'emergency_contact_relation' => ['required', 'string', 'max:50'],
 
             // 3. Persetujuan Syarat & Tanda Tangan Digital
-            'signature_data' => ['required', 'string'],
+            'signature_data' => ['required', 'string', 'max:200000', 'starts_with:data:image/'],
             'agree_terms' => ['accepted'],
         ], [
             'start_date.required' => 'Tanggal mulai sewa wajib dipilih.',
@@ -147,16 +149,29 @@ class RentalController extends Controller
         $duration = (int) $validated['duration_days'];
         $endDate = $startDate->copy()->addDays($duration - 1);
 
+        // Agregasi jumlah sewa per produk untuk mencegah bypass stok dari produk duplikat
+        $consolidatedProducts = [];
+        foreach ($validated['products'] as $itemData) {
+            $pId = (int) $itemData['id'];
+            $qty = (int) $itemData['quantity'];
+            $consolidatedProducts[$pId] = ($consolidatedProducts[$pId] ?? 0) + $qty;
+        }
+
         $selectedProducts = [];
         $subtotalPerDay = 0;
 
-        foreach ($validated['products'] as $itemData) {
-            $product = Product::findOrFail($itemData['id']);
-            $qty = (int) $itemData['quantity'];
+        foreach ($consolidatedProducts as $pId => $qty) {
+            $product = Product::findOrFail($pId);
+
+            if ($product->condition && stripos($product->condition, 'Perawatan') !== false) {
+                return back()->withInput()->withErrors([
+                    'products' => "Produk '{$product->name}' sedang dalam perawatan dan tidak dapat disewa.",
+                ]);
+            }
 
             if ($product->stock < $qty) {
                 return back()->withInput()->withErrors([
-                    'products' => "Stok untuk produk '{$product->name}' tidak mencukupi (sisa {$product->stock}).",
+                    'products' => "Stok untuk produk '{$product->name}' tidak mencukupi (sisa {$product->stock}, total diminta {$qty}).",
                 ]);
             }
 
@@ -191,6 +206,18 @@ class RentalController extends Controller
         $appliedPromotion = null;
 
         if ($promoCode !== '') {
+            // Batasi penggunaan promo 1 kali per akun pengguna (kecuali pesanan batal/ditolak)
+            $alreadyUsed = Rental::where('user_id', Auth::id())
+                ->where('promo_code', $promoCode)
+                ->whereNotIn('status', ['cancelled', 'rejected'])
+                ->exists();
+
+            if ($alreadyUsed) {
+                return back()->withInput()->withErrors([
+                    'promo_code' => "Anda sudah pernah menggunakan kode promo '{$promoCode}'. Setiap kode promo hanya dapat digunakan 1 kali per akun.",
+                ]);
+            }
+
             $promotion = Promotion::where('code', $promoCode)->first();
             if ($promotion && $promotion->isValidForAmount($subtotalAfterDuration)) {
                 $appliedPromotion = $promotion;
@@ -206,85 +233,105 @@ class RentalController extends Controller
         $requiresStampDuty = $totalPrice >= RentalVerification::STAMP_DUTY_THRESHOLD;
         $stampDutyFee = $requiresStampDuty ? RentalVerification::STAMP_DUTY_FEE : 0.0;
 
-        // Penyimpanan berkas dokumen KTP ke direktori privat terlindungi (bukan public)
-        $idCardPath = $request->hasFile('id_card_file')
-            ? $request->file('id_card_file')->store('private/verifications/ktp', 'local')
-            : null;
-
         $clientIp = $request->ip();
+        $idCardPath = null;
 
-        $rental = DB::transaction(function () use (
-            $startDate,
-            $endDate,
-            $duration,
-            $totalPrice,
-            $selectedProducts,
-            $finalNotes,
-            $promoCode,
-            $promoDiscount,
-            $appliedPromotion,
-            $validated,
-            $idCardPath,
-            $requiresStampDuty,
-            $stampDutyFee,
-            $clientIp
-        ) {
-            $code = 'RET-'.date('Ymd').'-'.strtoupper(Str::random(5));
-
-            $rental = Rental::create([
-                'user_id' => Auth::id(),
-                'rental_code' => $code,
-                'start_date' => $startDate->toDateString(),
-                'end_date' => $endDate->toDateString(),
-                'duration_days' => $duration,
-                'total_price' => $totalPrice,
-                'promo_code' => $appliedPromotion ? $promoCode : null,
-                'discount_amount' => $promoDiscount,
-                'status' => 'pending_payment',
-                'notes' => $finalNotes ?: null,
-            ]);
-
-            if ($appliedPromotion) {
-                $appliedPromotion->increment('quota_used');
+        try {
+            // Penyimpanan berkas dokumen KTP ke direktori privat terlindungi
+            if ($request->hasFile('id_card_file')) {
+                $idCardPath = $request->file('id_card_file')->store('private/verifications/ktp', 'local');
             }
 
-            foreach ($selectedProducts as $item) {
-                RentalItem::create([
+            $rental = DB::transaction(function () use (
+                $startDate,
+                $endDate,
+                $duration,
+                $totalPrice,
+                $subtotalAfterDuration,
+                $selectedProducts,
+                $finalNotes,
+                $promoCode,
+                $promoDiscount,
+                $appliedPromotion,
+                $validated,
+                $idCardPath,
+                $requiresStampDuty,
+                $stampDutyFee,
+                $clientIp
+            ) {
+                $code = 'RET-'.date('Ymd').'-'.strtoupper(Str::random(5));
+
+                $rental = Rental::create([
+                    'user_id' => Auth::id(),
+                    'rental_code' => $code,
+                    'start_date' => $startDate->toDateString(),
+                    'end_date' => $endDate->toDateString(),
+                    'duration_days' => $duration,
+                    'total_price' => $totalPrice,
+                    'promo_code' => $appliedPromotion ? $promoCode : null,
+                    'discount_amount' => $promoDiscount,
+                    'status' => 'pending_payment',
+                    'notes' => $finalNotes ?: null,
+                ]);
+
+                // Kunci baris promo dengan lockForUpdate untuk mencegah race condition kuota
+                if ($appliedPromotion) {
+                    $lockedPromo = Promotion::lockForUpdate()->find($appliedPromotion->id);
+                    if (! $lockedPromo || ! $lockedPromo->isValidForAmount($subtotalAfterDuration)) {
+                        throw new \RuntimeException("Kuota kode promo '{$promoCode}' sudah habis atau promo tidak lagi valid.");
+                    }
+                    $lockedPromo->increment('quota_used');
+                }
+
+                foreach ($selectedProducts as $item) {
+                    RentalItem::create([
+                        'rental_id' => $rental->id,
+                        'product_id' => $item['product']->id,
+                        'quantity' => $item['quantity'],
+                        'price_per_day' => $item['price_per_day'],
+                        'subtotal' => $item['subtotal'],
+                    ]);
+                }
+
+                // Catat data verifikasi KTP, tanggal lahir, surat perjanjian sewa, bea meterai, dan tanda tangan
+                RentalVerification::create([
                     'rental_id' => $rental->id,
-                    'product_id' => $item['product']->id,
-                    'quantity' => $item['quantity'],
-                    'price_per_day' => $item['price_per_day'],
-                    'subtotal' => $item['subtotal'],
-                ]);
-            }
-
-            // Catat data verifikasi KTP, tanggal lahir, surat perjanjian sewa, bea meterai, dan tanda tangan
-            RentalVerification::create([
-                'rental_id' => $rental->id,
-                'user_id' => Auth::id(),
-                'birth_date' => $validated['birth_date'],
-                'id_card_number' => $validated['id_card_number'],
-                'id_card_file' => $idCardPath,
-                'rental_purpose' => $validated['rental_purpose'],
-                'emergency_contact_name' => $validated['emergency_contact_name'],
-                'emergency_contact_phone' => $validated['emergency_contact_phone'],
-                'emergency_contact_relation' => $validated['emergency_contact_relation'],
-                'signature_data' => $validated['signature_data'],
-                'agreement_signed_at' => Carbon::now(),
-                'agreement_ip_address' => $clientIp,
-                'requires_stamp_duty' => $requiresStampDuty,
-                'stamp_duty_amount' => $stampDutyFee,
-                'verification_status' => RentalVerification::STATUS_MENUNGGU,
-            ]);
-
-            if (! empty($validated['id_card_number'])) {
-                Auth::user()->update([
+                    'user_id' => Auth::id(),
+                    'birth_date' => $validated['birth_date'],
                     'id_card_number' => $validated['id_card_number'],
+                    'id_card_file' => $idCardPath,
+                    'rental_purpose' => $validated['rental_purpose'],
+                    'emergency_contact_name' => $validated['emergency_contact_name'],
+                    'emergency_contact_phone' => $validated['emergency_contact_phone'],
+                    'emergency_contact_relation' => $validated['emergency_contact_relation'],
+                    'signature_data' => $validated['signature_data'],
+                    'agreement_signed_at' => Carbon::now(),
+                    'agreement_ip_address' => $clientIp,
+                    'requires_stamp_duty' => $requiresStampDuty,
+                    'stamp_duty_amount' => $stampDutyFee,
+                    'verification_status' => RentalVerification::STATUS_MENUNGGU,
                 ]);
+
+                if (! empty($validated['id_card_number'])) {
+                    Auth::user()->update([
+                        'id_card_number' => $validated['id_card_number'],
+                    ]);
+                }
+
+                return $rental;
+            });
+        } catch (\Throwable $e) {
+            // Bersihkan berkas KTP jika transaksi database gagal agar tidak menjadi berkas yatim
+            if ($idCardPath && Storage::disk('local')->exists($idCardPath)) {
+                Storage::disk('local')->delete($idCardPath);
             }
 
-            return $rental;
-        });
+            if ($e instanceof \RuntimeException) {
+                return back()->withInput()->withErrors(['promo_code' => $e->getMessage()]);
+            }
+
+            throw $e;
+        }
 
         // Clear session cart once converted to rental
         session()->forget('cart');
@@ -332,12 +379,18 @@ class RentalController extends Controller
             abort(403);
         }
 
+        if ($rental->status !== 'pending_payment') {
+            return redirect()->route('rentals.show', $rental->id)
+                ->with('error', 'Pembayaran hanya dapat dilakukan untuk pesanan yang berstatus menunggu pembayaran.');
+        }
+
         $validated = $request->validate([
             'payment_method' => ['required', 'string', 'in:transfer_bca,transfer_mandiri,qris,cash_store'],
-            'payment_proof' => ['nullable', 'image', 'max:3072'],
+            'payment_proof' => ['required_unless:payment_method,cash_store', 'nullable', 'image', 'max:3072'],
             'notes' => ['nullable', 'string', 'max:500'],
         ], [
             'payment_method.required' => 'Pilih salah satu metode pembayaran.',
+            'payment_proof.required_unless' => 'Bukti pembayaran wajib diunggah kecuali memilih pembayaran tunai di toko.',
             'payment_proof.image' => 'File bukti transfer harus berupa gambar (JPG, PNG).',
             'payment_proof.max' => 'Ukuran file bukti pembayaran maksimal 3MB.',
         ]);
@@ -386,10 +439,19 @@ class RentalController extends Controller
             return back()->with('error', 'Pesanan ini sudah dikonfirmasi atau diproses dan tidak dapat dibatalkan.');
         }
 
-        $rental->update([
-            'status' => 'cancelled',
-            'admin_notes' => 'Dibatalkan oleh penyewa.',
-        ]);
+        DB::transaction(function () use ($rental): void {
+            if ($rental->promo_code) {
+                $promo = Promotion::lockForUpdate()->where('code', $rental->promo_code)->first();
+                if ($promo && $promo->quota_used > 0) {
+                    $promo->decrement('quota_used');
+                }
+            }
+
+            $rental->update([
+                'status' => 'cancelled',
+                'admin_notes' => 'Dibatalkan oleh penyewa.',
+            ]);
+        });
 
         return redirect()->route('account.rentals')
             ->with('success', 'Penyewaan berhasil dibatalkan.');

@@ -48,4 +48,20 @@ class Product extends Model
     {
         return $this->hasMany(Review::class);
     }
+
+    /**
+     * Hitung sisa stok tersedia untuk rentang tanggal tertentu berdasarkan pesanan aktif.
+     */
+    public function getAvailableStockForDateRange(string $startDate, string $endDate): int
+    {
+        $bookedQuantity = (int) RentalItem::where('product_id', $this->id)
+            ->whereHas('rental', function ($query) use ($startDate, $endDate) {
+                $query->whereIn('status', ['confirmed', 'preparing', 'ready_pickup', 'in_use'])
+                    ->where('start_date', '<=', $endDate)
+                    ->where('end_date', '>=', $startDate);
+            })
+            ->sum('quantity');
+
+        return max(0, $this->stock - $bookedQuantity);
+    }
 }

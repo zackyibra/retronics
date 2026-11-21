@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Promotion;
 use App\Models\Rental;
 use App\Models\RentalItem;
 use App\Models\RentalVerification;
@@ -366,6 +367,55 @@ class RentalVerificationTest extends TestCase
         $revResponse->assertRedirect();
         $this->assertEquals('perlu_revisi', $verification->fresh()->verification_status);
         $this->assertEquals('Foto KTP terpotong bagian NIK, mohon upload ulang.', $verification->fresh()->admin_notes);
+    }
+
+    public function test_rejecting_document_sets_rental_status_to_rejected_and_restores_promo_quota(): void
+    {
+        $promo = Promotion::firstOrCreate(
+            ['code' => 'KTPREJECTTEST'],
+            [
+                'name' => 'Diskon Pembukaan',
+                'type' => 'percentage',
+                'discount_value' => 10,
+                'max_discount' => 50000,
+                'min_transaction' => 0,
+                'quota_total' => 100,
+                'quota_used' => 1,
+                'start_date' => now()->subDay(),
+                'end_date' => now()->addMonth(),
+                'is_active' => true,
+            ]
+        );
+        $promo->update(['quota_used' => 1]);
+
+        $rental = Rental::create([
+            'user_id' => $this->customer->id,
+            'rental_code' => 'RET-KTP-REJECT-01',
+            'start_date' => Carbon::tomorrow()->toDateString(),
+            'end_date' => Carbon::tomorrow()->addDay()->toDateString(),
+            'duration_days' => 2,
+            'total_price' => 450000,
+            'promo_code' => 'KTPREJECTTEST',
+            'discount_amount' => 50000,
+            'status' => 'waiting_verification',
+        ]);
+
+        $verification = RentalVerification::create([
+            'rental_id' => $rental->id,
+            'user_id' => $this->customer->id,
+            'verification_status' => RentalVerification::STATUS_MENUNGGU,
+        ]);
+
+        $response = $this->actingAs($this->admin)->post(route('admin.rentals.verify_document', $rental->id), [
+            'verification_status' => 'ditolak',
+            'admin_notes' => 'KTP palsu / tidak valid.',
+        ]);
+
+        $response->assertRedirect();
+        $this->assertEquals(RentalVerification::STATUS_DITOLAK, $verification->fresh()->verification_status);
+        $this->assertEquals('rejected', $rental->fresh()->status);
+        $this->assertEquals('KTP palsu / tidak valid.', $rental->fresh()->admin_notes);
+        $this->assertEquals(0, $promo->fresh()->quota_used);
     }
 
     public function test_admin_dashboard_and_rentals_index_display_and_filter_verification_data(): void

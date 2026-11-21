@@ -91,7 +91,7 @@ class RetronicsFlowTest extends TestCase
             'email' => 'user@retronics.test',
             'password' => 'password123',
         ]);
-        $response->assertRedirect(route('account.index'));
+        $response->assertRedirect(route('home'));
         $this->assertAuthenticated();
 
         // Logout
@@ -109,7 +109,7 @@ class RetronicsFlowTest extends TestCase
             'password_confirmation' => 'password123',
             'agree_terms' => '1',
         ]);
-        $response->assertRedirect(route('account.index'));
+        $response->assertRedirect(route('home'));
         $this->assertDatabaseHas('users', ['email' => 'kreator@example.com']);
     }
 
@@ -150,6 +150,7 @@ class RetronicsFlowTest extends TestCase
         // Pengguna melakukan pembayaran (upload / konfirmasi)
         $response = $this->post(route('rentals.pay', $rental->id), [
             'payment_method' => 'transfer_bca',
+            'payment_proof' => UploadedFile::fake()->image('bukti_bca.jpg'),
         ]);
 
         $response->assertRedirect(route('rentals.show', $rental->id));

@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2000 1400" width="100%" height="100%">
+  <defs>
+    <style>
+      .title { font-family: Arial, Helvetica, sans-serif; font-size: 32px; font-weight: bold; fill: #111827; text-anchor: middle; }
+      .subtitle { font-family: Arial, Helvetica, sans-serif; font-size: 16px; fill: #6b7280; text-anchor: middle; }
+      .entity-rect { fill: #ffffff; stroke: #1e293b; stroke-width: 2; }
+      .entity-text { font-family: Arial, Helvetica, sans-serif; font-size: 13px; font-weight: bold; fill: #0f172a; text-anchor: middle; letter-spacing: 0.5px; }
+      .attr-oval { fill: #ffffff; stroke: #475569; stroke-width: 1.2; }
+      .attr-text { font-family: Arial, Helvetica, sans-serif; font-size: 11px; fill: #1e293b; text-anchor: middle; }
+      .attr-pk { font-family: Arial, Helvetica, sans-serif; font-size: 11px; font-weight: bold; text-decoration: underline; fill: #0f172a; text-anchor: middle; }
+      .rel-diamond { fill: #ffffff; stroke: #1e293b; stroke-width: 1.8; }
+      .rel-text { font-family: Arial, Helvetica, sans-serif; font-size: 11.5px; font-style: italic; fill: #1e293b; text-anchor: middle; }
+      .conn-line { stroke: #64748b; stroke-width: 1.2; }
+      .rel-line { stroke: #1e293b; stroke-width: 1.6; }
+      .card-text { font-family: Arial, Helvetica, sans-serif; font-size: 13px; font-weight: bold; fill: #0f172a; text-anchor: middle; }
+    </style>
+  </defs>
+  <rect width="2000" height="1400" fill="#ffffff"/>
+  <text x="1000" y="60" class="title">ENTITY RELATIONSHIP DIAGRAM (ERD)</text>
+  <text x="1000" y="90" class="subtitle">Retronics – Camera Rental Service (Notasi Chen)</text>
+  <line x1="235" y1="130" x2="310" y2="175" class="rel-line"/>
+  <line x1="310" y1="175" x2="520" y2="262.5" class="rel-line"/>
+  <polygon points="310,152.5 362.5,175 310,197.5 257.5,175" class="rel-diamond"/>
+  <text x="310" y="179" class="rel-text">Memiliki</text>
+  <text x="265" y="140" class="card-text">1</text>
+  <text x="370" y="210" class="card-text">M</text>
+  <line x1="520" y1="262.5" x2="700" y2="240" class="rel-line"/>
+  <line x1="700" y1="240" x2="1025" y2="264" class="rel-line"/>
+  <polygon points="700,217.5 752.5,240 700,262.5 647.5,240" class="rel-diamond"/>
+  <text x="700" y="244" class="rel-text">Terdapat pada</text>
+  <text x="545" y="230" class="card-text">1</text>
+  <text x="850" y="230" class="card-text">M</text>
+  <line x1="1025" y1="264" x2="1025" y2="380" class="rel-line"/>
+  <line x1="1025" y1="380" x2="1025" y2="545" class="rel-line"/>
+  <polygon points="1025,357.5 1077.5,380 1025,402.5 972.5,380" class="rel-diamond"/>
+  <text x="1025" y="384" class="rel-text">Memiliki</text>
+  <text x="1040" y="300" class="card-text">M</text>
+  <text x="1040" y="470" class="card-text">1</text>
+  <line x1="520" y1="662.5" x2="740" y2="580" class="rel-line"/>
+  <line x1="740" y1="580" x2="1025" y2="545" class="rel-line"/>
+  <polygon points="740,557.5 792.5,580 740,602.5 687.5,580" class="rel-diamond"/>
+  <text x="740" y="584" class="rel-text">Melakukan</text>
+  <text x="580" y="625" class="card-text">1</text>
+  <text x="890" y="545" class="card-text">M</text>
+  <line x1="1025" y1="545" x2="1270" y2="450" class="rel-line"/>
+  <line x1="1270" y1="450" x2="1547.5" y2="404" class="rel-line"/>
+  <polygon points="1270,427.5 1322.5,450 1270,472.5 1217.5,450" class="rel-diamond"/>
+  <text x="1270" y="454" class="rel-text">Diverifikasi</text>
+  <text x="1120" y="490" class="card-text">1</text>
+  <text x="1400" y="415" class="card-text">1</text>
+  <line x1="1025" y1="545" x2="1025" y2="690" class="rel-line"/>
+  <line x1="1025" y1="690" x2="1025" y2="864" class="rel-line"/>
+  <polygon points="1025,667.5 1077.5,690 1025,712.5 972.5,690" class="rel-diamond"/>
+  <text x="1025" y="694" class="rel-text">Dibayar</text>
+  <text x="1040" y="590" class="card-text">1</text>
+  <text x="1040" y="785" class="card-text">M</text>
+  <line x1="1025" y1="545" x2="1270" y2="580" class="rel-line"/>
+  <line x1="1270" y1="580" x2="1535" y2="664" class="rel-line"/>
+  <polygon points="1270,557.5 1322.5,580 1270,602.5 1217.5,580" class="rel-diamond"/>
+  <text x="1270" y="584" class="rel-text">Dikenakan</text>
+  <text x="1120" y="545" class="card-text">1</text>
+  <text x="1400" y="620" class="card-text">M</text>
+  <line x1="520" y1="662.5" x2="950" y2="760" class="rel-line"/>
+  <line x1="950" y1="760" x2="1535" y2="924" class="rel-line"/>
+  <polygon points="950,737.5 1002.5,760 950,782.5 897.5,760" class="rel-diamond"/>
+  <text x="950" y="764" class="rel-text">Memberikan</text>
+  <text x="580" y="670" class="card-text">1</text>
+  <text x="1400" y="880" class="card-text">M</text>
+  <line x1="235" y1="130" x2="95" y2="90" class="conn-line"/>
+  <ellipse cx="95" cy="90" rx="44" ry="14" class="attr-oval"/>
+  <text x="95" y="94" class="attr-pk">id</text>
+  <line x1="235" y1="130" x2="95" y2="120" class="conn-line"/>
+  <ellipse cx="95" cy="120" rx="44" ry="14" class="attr-oval"/>
+  <text x="95" y="124" class="attr-text">name</text>
+  <line x1="235" y1="130" x2="95" y2="150" class="conn-line"/>
+  <ellipse cx="95" cy="150" rx="44" ry="14" class="attr-oval"/>
+  <text x="95" y="154" class="attr-text">slug</text>
+  <line x1="235" y1="130" x2="95" y2="180" class="conn-line"/>
+  <ellipse cx="95" cy="180" rx="64.6" ry="14" class="attr-oval"/>
+  <text x="95" y="184" class="attr-text">description</text>
+  <line x1="235" y1="130" x2="185" y2="195" class="conn-line"/>
+  <ellipse cx="185" cy="195" rx="44" ry="14" class="attr-oval"/>
+  <text x="185" y="199" class="attr-text">icon</text>
+  <line x1="520" y1="262.5" x2="360" y2="182.5" class="conn-line"/>
+  <ellipse cx="360" cy="182.5" rx="44" ry="14" class="attr-oval"/>
+  <text x="360" y="186.5" class="attr-pk">id</text>
+  <line x1="520" y1="262.5" x2="360" y2="212.5" class="conn-line"/>
+  <ellipse cx="360" cy="212.5" rx="64.6" ry="14" class="attr-oval"/>
+  <text x="360" y="216.5" class="attr-text">category_id</text>
+  <line x1="520" y1="262.5" x2="360" y2="242.5" class="conn-line"/>
+  <ellipse cx="360" cy="242.5" rx="44" ry="14" class="attr-oval"/>
+  <text x="360" y="246.5" class="attr-text">name</text>
+  <line x1="520" y1="262.5" x2="360" y2="272.5" class="conn-line"/>
+  <ellipse cx="360" cy="272.5" rx="44" ry="14" class="attr-oval"/>
+  <text x="360" y="276.5" class="attr-text">slug</text>
+  <line x1="520" y1="262.5" x2="360" y2="302.5" class="conn-line"/>
+  <ellipse cx="360" cy="302.5" rx="73.8" ry="14" class="attr-oval"/>
+  <text x="360" y="306.5" class="attr-text">price_per_day</text>
+  <line x1="520" y1="262.5" x2="360" y2="332.5" class="conn-line"/>
+  <ellipse cx="360" cy="332.5" rx="44" ry="14" class="attr-oval"/>
+  <text x="360" y="336.5" class="attr-text">stock</text>
+  <line x1="520" y1="262.5" x2="360" y2="362.5" class="conn-line"/>
+  <ellipse cx="360" cy="362.5" rx="55.4" ry="14" class="attr-oval"/>
+  <text x="360" y="366.5" class="attr-text">condition</text>
+  <line x1="520" y1="262.5" x2="450" y2="382.5" class="conn-line"/>
+  <ellipse cx="450" cy="382.5" rx="44" ry="14" class="attr-oval"/>
+  <text x="450" y="386.5" class="attr-text">image</text>
+  <line x1="520" y1="262.5" x2="550" y2="382.5" class="conn-line"/>
+  <ellipse cx="550" cy="382.5" rx="55.4" ry="14" class="attr-oval"/>
+  <text x="550" y="386.5" class="attr-text">is_active</text>
+  <line x1="520" y1="662.5" x2="350" y2="512.5" class="conn-line"/>
+  <ellipse cx="350" cy="512.5" rx="44" ry="14" class="attr-oval"/>
+  <text x="350" y="516.5" class="attr-pk">id</text>
+  <line x1="520" y1="662.5" x2="350" y2="542.5" class="conn-line"/>
+  <ellipse cx="350" cy="542.5" rx="44" ry="14" class="attr-oval"/>
+  <text x="350" y="546.5" class="attr-text">name</text>
+  <line x1="520" y1="662.5" x2="350" y2="572.5" class="conn-line"/>
+  <ellipse cx="350" cy="572.5" rx="44" ry="14" class="attr-oval"/>
+  <text x="350" y="576.5" class="attr-text">email</text>
+  <line x1="520" y1="662.5" x2="350" y2="602.5" class="conn-line"/>
+  <ellipse cx="350" cy="602.5" rx="50.8" ry="14" class="attr-oval"/>
+  <text x="350" y="606.5" class="attr-text">password</text>
+  <line x1="520" y1="662.5" x2="350" y2="632.5" class="conn-line"/>
+  <ellipse cx="350" cy="632.5" rx="44" ry="14" class="attr-oval"/>
+  <text x="350" y="636.5" class="attr-text">role</text>
+  <line x1="520" y1="662.5" x2="350" y2="662.5" class="conn-line"/>
+  <ellipse cx="350" cy="662.5" rx="44" ry="14" class="attr-oval"/>
+  <text x="350" y="666.5" class="attr-text">phone</text>
+  <line x1="520" y1="662.5" x2="350" y2="692.5" class="conn-line"/>
+  <ellipse cx="350" cy="692.5" rx="46.2" ry="14" class="attr-oval"/>
+  <text x="350" y="696.5" class="attr-text">address</text>
+  <line x1="520" y1="662.5" x2="350" y2="722.5" class="conn-line"/>
+  <ellipse cx="350" cy="722.5" rx="60" ry="14" class="attr-oval"/>
+  <text x="350" y="726.5" class="attr-text">birth_date</text>
+  <line x1="520" y1="662.5" x2="350" y2="752.5" class="conn-line"/>
+  <ellipse cx="350" cy="752.5" rx="78.4" ry="14" class="attr-oval"/>
+  <text x="350" y="756.5" class="attr-text">id_card_number</text>
+  <line x1="520" y1="662.5" x2="350" y2="782.5" class="conn-line"/>
+  <ellipse cx="350" cy="782.5" rx="69.2" ry="14" class="attr-oval"/>
+  <text x="350" y="786.5" class="attr-text">id_card_file</text>
+  <line x1="520" y1="662.5" x2="350" y2="812.5" class="conn-line"/>
+  <ellipse cx="350" cy="812.5" rx="83" ry="14" class="attr-oval"/>
+  <text x="350" y="816.5" class="attr-text">terms_agreed_at</text>
+  <line x1="520" y1="662.5" x2="440" y2="842.5" class="conn-line"/>
+  <ellipse cx="440" cy="842.5" rx="92.2" ry="14" class="attr-oval"/>
+  <text x="440" y="846.5" class="attr-text">privacy_agreed_at</text>
+  <line x1="1025" y1="545" x2="1025" y2="465" class="conn-line"/>
+  <ellipse cx="1025" cy="465" rx="44" ry="14" class="attr-oval"/>
+  <text x="1025" y="469" class="attr-pk">id</text>
+  <line x1="1025" y1="545" x2="1105" y2="475" class="conn-line"/>
+  <ellipse cx="1105" cy="475" rx="64.6" ry="14" class="attr-oval"/>
+  <text x="1105" y="479" class="attr-text">rental_code</text>
+  <line x1="1025" y1="545" x2="1185" y2="505" class="conn-line"/>
+  <ellipse cx="1185" cy="505" rx="46.2" ry="14" class="attr-oval"/>
+  <text x="1185" y="509" class="attr-text">user_id</text>
+  <line x1="1025" y1="545" x2="1195" y2="535" class="conn-line"/>
+  <ellipse cx="1195" cy="535" rx="60" ry="14" class="attr-oval"/>
+  <text x="1195" y="539" class="attr-text">start_date</text>
+  <line x1="1025" y1="545" x2="1195" y2="565" class="conn-line"/>
+  <ellipse cx="1195" cy="565" rx="50.8" ry="14" class="attr-oval"/>
+  <text x="1195" y="569" class="attr-text">end_date</text>
+  <line x1="1025" y1="545" x2="1195" y2="595" class="conn-line"/>
+  <ellipse cx="1195" cy="595" rx="73.8" ry="14" class="attr-oval"/>
+  <text x="1195" y="599" class="attr-text">duration_days</text>
+  <line x1="1025" y1="545" x2="1185" y2="625" class="conn-line"/>
+  <ellipse cx="1185" cy="625" rx="64.6" ry="14" class="attr-oval"/>
+  <text x="1185" y="629" class="attr-text">total_price</text>
+  <line x1="1025" y1="545" x2="1105" y2="640" class="conn-line"/>
+  <ellipse cx="1105" cy="640" rx="60" ry="14" class="attr-oval"/>
+  <text x="1105" y="644" class="attr-text">promo_code</text>
+  <line x1="1025" y1="545" x2="1025" y2="640" class="conn-line"/>
+  <ellipse cx="1025" cy="640" rx="44" ry="14" class="attr-oval"/>
+  <text x="1025" y="644" class="attr-text">status</text>
+  <line x1="1025" y1="545" x2="945" y2="630" class="conn-line"/>
+  <ellipse cx="945" cy="630" rx="64.6" ry="14" class="attr-oval"/>
+  <text x="945" y="634" class="attr-text">returned_at</text>
+  <line x1="1025" y1="264" x2="915" y2="194" class="conn-line"/>
+  <ellipse cx="915" cy="194" rx="44" ry="14" class="attr-oval"/>
+  <text x="915" y="198" class="attr-pk">id</text>
+  <line x1="1025" y1="264" x2="985" y2="184" class="conn-line"/>
+  <ellipse cx="985" cy="184" rx="55.4" ry="14" class="attr-oval"/>
+  <text x="985" y="188" class="attr-text">rental_id</text>
+  <line x1="1025" y1="264" x2="1065" y2="184" class="conn-line"/>
+  <ellipse cx="1065" cy="184" rx="60" ry="14" class="attr-oval"/>
+  <text x="1065" y="188" class="attr-text">product_id</text>
+  <line x1="1025" y1="264" x2="1135" y2="194" class="conn-line"/>
+  <ellipse cx="1135" cy="194" rx="50.8" ry="14" class="attr-oval"/>
+  <text x="1135" y="198" class="attr-text">quantity</text>
+  <line x1="1025" y1="264" x2="1175" y2="234" class="conn-line"/>
+  <ellipse cx="1175" cy="234" rx="73.8" ry="14" class="attr-oval"/>
+  <text x="1175" y="238" class="attr-text">price_per_day</text>
+  <line x1="1025" y1="264" x2="1175" y2="279" class="conn-line"/>
+  <ellipse cx="1175" cy="279" rx="50.8" ry="14" class="attr-oval"/>
+  <text x="1175" y="283" class="attr-text">subtotal</text>
+  <line x1="1025" y1="864" x2="1185" y2="794" class="conn-line"/>
+  <ellipse cx="1185" cy="794" rx="44" ry="14" class="attr-oval"/>
+  <text x="1185" y="798" class="attr-pk">id</text>
+  <line x1="1025" y1="864" x2="1195" y2="824" class="conn-line"/>
+  <ellipse cx="1195" cy="824" rx="55.4" ry="14" class="attr-oval"/>
+  <text x="1195" y="828" class="attr-text">rental_id</text>
+  <line x1="1025" y1="864" x2="1195" y2="854" class="conn-line"/>
+  <ellipse cx="1195" cy="854" rx="69.2" ry="14" class="attr-oval"/>
+  <text x="1195" y="858" class="attr-text">payment_code</text>
+  <line x1="1025" y1="864" x2="1195" y2="884" class="conn-line"/>
+  <ellipse cx="1195" cy="884" rx="44" ry="14" class="attr-oval"/>
+  <text x="1195" y="888" class="attr-text">amount</text>
+  <line x1="1025" y1="864" x2="1195" y2="914" class="conn-line"/>
+  <ellipse cx="1195" cy="914" rx="78.4" ry="14" class="attr-oval"/>
+  <text x="1195" y="918" class="attr-text">payment_method</text>
+  <line x1="1025" y1="864" x2="1195" y2="944" class="conn-line"/>
+  <ellipse cx="1195" cy="944" rx="73.8" ry="14" class="attr-oval"/>
+  <text x="1195" y="948" class="attr-text">payment_proof</text>
+  <line x1="1025" y1="864" x2="1125" y2="959" class="conn-line"/>
+  <ellipse cx="1125" cy="959" rx="69.2" ry="14" class="attr-oval"/>
+  <text x="1125" y="963" class="attr-text">payment_date</text>
+  <line x1="1025" y1="864" x2="1045" y2="959" class="conn-line"/>
+  <ellipse cx="1045" cy="959" rx="44" ry="14" class="attr-oval"/>
+  <text x="1045" y="963" class="attr-text">status</text>
+  <line x1="1025" y1="864" x2="965" y2="959" class="conn-line"/>
+  <ellipse cx="965" cy="959" rx="64.6" ry="14" class="attr-oval"/>
+  <text x="965" y="963" class="attr-text">verified_by</text>
+  <line x1="1547.5" y1="404" x2="1727.5" y2="314" class="conn-line"/>
+  <ellipse cx="1727.5" cy="314" rx="44" ry="14" class="attr-oval"/>
+  <text x="1727.5" y="318" class="attr-pk">id</text>
+  <line x1="1547.5" y1="404" x2="1727.5" y2="344" class="conn-line"/>
+  <ellipse cx="1727.5" cy="344" rx="55.4" ry="14" class="attr-oval"/>
+  <text x="1727.5" y="348" class="attr-text">rental_id</text>
+  <line x1="1547.5" y1="404" x2="1727.5" y2="374" class="conn-line"/>
+  <ellipse cx="1727.5" cy="374" rx="46.2" ry="14" class="attr-oval"/>
+  <text x="1727.5" y="378" class="attr-text">user_id</text>
+  <line x1="1547.5" y1="404" x2="1727.5" y2="404" class="conn-line"/>
+  <ellipse cx="1727.5" cy="404" rx="78.4" ry="14" class="attr-oval"/>
+  <text x="1727.5" y="408" class="attr-text">id_card_number</text>
+  <line x1="1547.5" y1="404" x2="1727.5" y2="434" class="conn-line"/>
+  <ellipse cx="1727.5" cy="434" rx="69.2" ry="14" class="attr-oval"/>
+  <text x="1727.5" y="438" class="attr-text">id_card_file</text>
+  <line x1="1547.5" y1="404" x2="1727.5" y2="464" class="conn-line"/>
+  <ellipse cx="1727.5" cy="464" rx="60" ry="14" class="attr-oval"/>
+  <text x="1727.5" y="468" class="attr-text">birth_date</text>
+  <line x1="1547.5" y1="404" x2="1727.5" y2="494" class="conn-line"/>
+  <ellipse cx="1727.5" cy="494" rx="78.4" ry="14" class="attr-oval"/>
+  <text x="1727.5" y="498" class="attr-text">rental_purpose</text>
+  <line x1="1547.5" y1="404" x2="1737.5" y2="524" class="conn-line"/>
+  <ellipse cx="1737.5" cy="524" rx="115.2" ry="14" class="attr-oval"/>
+  <text x="1737.5" y="528" class="attr-text">emergency_contact_name</text>
+  <line x1="1547.5" y1="404" x2="1737.5" y2="554" class="conn-line"/>
+  <ellipse cx="1737.5" cy="554" rx="119.8" ry="14" class="attr-oval"/>
+  <text x="1737.5" y="558" class="attr-text">emergency_contact_phone</text>
+  <line x1="1547.5" y1="404" x2="1637.5" y2="574" class="conn-line"/>
+  <ellipse cx="1637.5" cy="574" rx="78.4" ry="14" class="attr-oval"/>
+  <text x="1637.5" y="578" class="attr-text">signature_data</text>
+  <line x1="1547.5" y1="404" x2="1537.5" y2="574" class="conn-line"/>
+  <ellipse cx="1537.5" cy="574" rx="101.4" ry="14" class="attr-oval"/>
+  <text x="1537.5" y="578" class="attr-text">verification_status</text>
+  <line x1="1535" y1="664" x2="1695" y2="594" class="conn-line"/>
+  <ellipse cx="1695" cy="594" rx="44" ry="14" class="attr-oval"/>
+  <text x="1695" y="598" class="attr-pk">id</text>
+  <line x1="1535" y1="664" x2="1705" y2="624" class="conn-line"/>
+  <ellipse cx="1705" cy="624" rx="55.4" ry="14" class="attr-oval"/>
+  <text x="1705" y="628" class="attr-text">rental_id</text>
+  <line x1="1535" y1="664" x2="1705" y2="654" class="conn-line"/>
+  <ellipse cx="1705" cy="654" rx="44" ry="14" class="attr-oval"/>
+  <text x="1705" y="658" class="attr-text">type</text>
+  <line x1="1535" y1="664" x2="1705" y2="684" class="conn-line"/>
+  <ellipse cx="1705" cy="684" rx="44" ry="14" class="attr-oval"/>
+  <text x="1705" y="688" class="attr-text">amount</text>
+  <line x1="1535" y1="664" x2="1705" y2="714" class="conn-line"/>
+  <ellipse cx="1705" cy="714" rx="55.4" ry="14" class="attr-oval"/>
+  <text x="1705" y="718" class="attr-text">days_late</text>
+  <line x1="1535" y1="664" x2="1705" y2="744" class="conn-line"/>
+  <ellipse cx="1705" cy="744" rx="69.2" ry="14" class="attr-oval"/>
+  <text x="1705" y="748" class="attr-text">rate_per_day</text>
+  <line x1="1535" y1="664" x2="1685" y2="774" class="conn-line"/>
+  <ellipse cx="1685" cy="774" rx="44" ry="14" class="attr-oval"/>
+  <text x="1685" y="778" class="attr-text">reason</text>
+  <line x1="1535" y1="664" x2="1605" y2="784" class="conn-line"/>
+  <ellipse cx="1605" cy="784" rx="44" ry="14" class="attr-oval"/>
+  <text x="1605" y="788" class="attr-text">photo</text>
+  <line x1="1535" y1="664" x2="1525" y2="784" class="conn-line"/>
+  <ellipse cx="1525" cy="784" rx="46.2" ry="14" class="attr-oval"/>
+  <text x="1525" y="788" class="attr-text">is_paid</text>
+  <line x1="1535" y1="924" x2="1695" y2="864" class="conn-line"/>
+  <ellipse cx="1695" cy="864" rx="44" ry="14" class="attr-oval"/>
+  <text x="1695" y="868" class="attr-pk">id</text>
+  <line x1="1535" y1="924" x2="1705" y2="894" class="conn-line"/>
+  <ellipse cx="1705" cy="894" rx="55.4" ry="14" class="attr-oval"/>
+  <text x="1705" y="898" class="attr-text">rental_id</text>
+  <line x1="1535" y1="924" x2="1705" y2="924" class="conn-line"/>
+  <ellipse cx="1705" cy="924" rx="60" ry="14" class="attr-oval"/>
+  <text x="1705" y="928" class="attr-text">product_id</text>
+  <line x1="1535" y1="924" x2="1705" y2="954" class="conn-line"/>
+  <ellipse cx="1705" cy="954" rx="46.2" ry="14" class="attr-oval"/>
+  <text x="1705" y="958" class="attr-text">user_id</text>
+  <line x1="1535" y1="924" x2="1705" y2="984" class="conn-line"/>
+  <ellipse cx="1705" cy="984" rx="44" ry="14" class="attr-oval"/>
+  <text x="1705" y="988" class="attr-text">rating</text>
+  <line x1="1535" y1="924" x2="1685" y2="1014" class="conn-line"/>
+  <ellipse cx="1685" cy="1014" rx="46.2" ry="14" class="attr-oval"/>
+  <text x="1685" y="1018" class="attr-text">comment</text>
+  <line x1="1535" y1="924" x2="1595" y2="1034" class="conn-line"/>
+  <ellipse cx="1595" cy="1034" rx="60" ry="14" class="attr-oval"/>
+  <text x="1595" y="1038" class="attr-text">created_at</text>
+  <line x1="520" y1="1122.5" x2="360" y2="1062.5" class="conn-line"/>
+  <ellipse cx="360" cy="1062.5" rx="44" ry="14" class="attr-oval"/>
+  <text x="360" y="1066.5" class="attr-pk">id</text>
+  <line x1="520" y1="1122.5" x2="360" y2="1092.5" class="conn-line"/>
+  <ellipse cx="360" cy="1092.5" rx="44" ry="14" class="attr-oval"/>
+  <text x="360" y="1096.5" class="attr-text">code</text>
+  <line x1="520" y1="1122.5" x2="360" y2="1122.5" class="conn-line"/>
+  <ellipse cx="360" cy="1122.5" rx="44" ry="14" class="attr-oval"/>
+  <text x="360" y="1126.5" class="attr-text">name</text>
+  <line x1="520" y1="1122.5" x2="360" y2="1152.5" class="conn-line"/>
+  <ellipse cx="360" cy="1152.5" rx="44" ry="14" class="attr-oval"/>
+  <text x="360" y="1156.5" class="attr-text">type</text>
+  <line x1="520" y1="1122.5" x2="360" y2="1182.5" class="conn-line"/>
+  <ellipse cx="360" cy="1182.5" rx="78.4" ry="14" class="attr-oval"/>
+  <text x="360" y="1186.5" class="attr-text">discount_value</text>
+  <line x1="520" y1="1122.5" x2="380" y2="1212.5" class="conn-line"/>
+  <ellipse cx="380" cy="1212.5" rx="83" ry="14" class="attr-oval"/>
+  <text x="380" y="1216.5" class="attr-text">min_transaction</text>
+  <line x1="520" y1="1122.5" x2="460" y2="1232.5" class="conn-line"/>
+  <ellipse cx="460" cy="1232.5" rx="64.6" ry="14" class="attr-oval"/>
+  <text x="460" y="1236.5" class="attr-text">quota_total</text>
+  <line x1="520" y1="1122.5" x2="550" y2="1232.5" class="conn-line"/>
+  <ellipse cx="550" cy="1232.5" rx="55.4" ry="14" class="attr-oval"/>
+  <text x="550" y="1236.5" class="attr-text">is_active</text>
+  <line x1="1025" y1="1202.5" x2="875" y2="1182.5" class="conn-line"/>
+  <ellipse cx="875" cy="1182.5" rx="44" ry="14" class="attr-oval"/>
+  <text x="875" y="1186.5" class="attr-pk">id</text>
+  <line x1="1025" y1="1202.5" x2="875" y2="1222.5" class="conn-line"/>
+  <ellipse cx="875" cy="1222.5" rx="73.8" ry="14" class="attr-oval"/>
+  <text x="875" y="1226.5" class="attr-text">merchant_name</text>
+  <line x1="1025" y1="1202.5" x2="1175" y2="1182.5" class="conn-line"/>
+  <ellipse cx="1175" cy="1182.5" rx="44" ry="14" class="attr-oval"/>
+  <text x="1175" y="1186.5" class="attr-text">nmid</text>
+  <line x1="1025" y1="1202.5" x2="1175" y2="1222.5" class="conn-line"/>
+  <ellipse cx="1175" cy="1222.5" rx="60" ry="14" class="attr-oval"/>
+  <text x="1175" y="1226.5" class="attr-text">image_path</text>
+  <line x1="1025" y1="1202.5" x2="1025" y2="1277.5" class="conn-line"/>
+  <ellipse cx="1025" cy="1277.5" rx="55.4" ry="14" class="attr-oval"/>
+  <text x="1025" y="1281.5" class="attr-text">is_active</text>
+  <rect x="450" y="240" width="140" height="45" class="entity-rect" rx="3"/>
+  <text x="520" y="267.5" class="entity-text">PRODUCTS</text>
+  <rect x="170" y="110" width="130" height="40" class="entity-rect" rx="3"/>
+  <text x="235" y="135" class="entity-text">CATEGORIES</text>
+  <rect x="450" y="640" width="140" height="45" class="entity-rect" rx="3"/>
+  <text x="520" y="667.5" class="entity-text">USERS</text>
+  <rect x="950" y="520" width="150" height="50" class="entity-rect" rx="3"/>
+  <text x="1025" y="550" class="entity-text">RENTALS</text>
+  <rect x="950" y="240" width="150" height="48" class="entity-rect" rx="3"/>
+  <text x="1025" y="269" class="entity-text">RENTAL_ITEMS</text>
+  <rect x="950" y="840" width="150" height="48" class="entity-rect" rx="3"/>
+  <text x="1025" y="869" class="entity-text">PAYMENTS</text>
+  <rect x="1460" y="380" width="175" height="48" class="entity-rect" rx="3"/>
+  <text x="1547.5" y="409" class="entity-text">VERIFIKASI_SPK</text>
+  <rect x="1460" y="640" width="150" height="48" class="entity-rect" rx="3"/>
+  <text x="1535" y="669" class="entity-text">FINES (DENDA)</text>
+  <rect x="1460" y="900" width="150" height="48" class="entity-rect" rx="3"/>
+  <text x="1535" y="929" class="entity-text">REVIEWS</text>
+  <rect x="450" y="1100" width="140" height="45" class="entity-rect" rx="3"/>
+  <text x="520" y="1127.5" class="entity-text">PROMOTIONS</text>
+  <rect x="950" y="1180" width="150" height="45" class="entity-rect" rx="3"/>
+  <text x="1025" y="1207.5" class="entity-text">QRIS_SETTINGS</text>
+</svg>

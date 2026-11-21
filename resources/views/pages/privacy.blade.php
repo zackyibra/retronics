@@ -59,7 +59,6 @@
                 <li>Memproses reservasi, pencatatan transaksi sewa, dan konfirmasi serah terima peralatan.</li>
                 <li>Mengirimkan notifikasi operasional (pemberitahuan persetujuan dokumen, konfirmasi pembayaran, dan pengingat jadwal pengembalian) melalui WhatsApp Gateway resmi.</li>
                 <li>Membuat Surat Perjanjian Sewa (SPK) yang sah dan berkekuatan hukum perdata antara kedua belah pihak.</li>
-                <li>Memfasilitasi pemulihan akun melalui kode verifikasi satu kali (*One-Time Password / OTP*) ke nomor WhatsApp terdaftar.</li>
             </ul>
         </section>
 
@@ -89,7 +88,7 @@
                 Kami menerapkan standar keamanan teknis dan organisasi yang sesuai:
             </p>
             <ul class="list-disc list-inside space-y-1.5 pl-2 text-slate-600">
-                <li><strong>Enkripsi Kata Sandi:</strong> Seluruh kata sandi akun dan kode OTP disimpan menggunakan algoritma hashing satu arah yang aman (*Bcrypt*), sehingga tidak dapat dibaca oleh staf maupun pengelola sistem.</li>
+                <li><strong>Enkripsi Kata Sandi:</strong> Seluruh kata sandi akun disimpan menggunakan algoritma hashing satu arah yang aman (*Bcrypt*), sehingga tidak dapat dibaca oleh staf maupun pengelola sistem.</li>
                 <li><strong>Penyimpanan Dokumen KTP Privat:</strong> Berkas foto KTP disimpan pada direktori penyimpanan privat server (*private local storage*) dan tidak dapat diakses secara publik melalui URL browser langsung. Setiap permintaan akses berkas mewajibkan pemeriksaan autentikasi dan otorisasi kepemilikan akun.</li>
                 <li><strong>Penyamaran Data Sensitif:</strong> NIK KTP dan nomor identitas disamarkan sebagian pada dokumen formulir yang dapat dicetak demi meminimalkan paparan informasi sensitif.</li>
             </ul>

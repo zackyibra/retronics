@@ -15,6 +15,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        if (app()->environment('production')) {
+            $this->command?->warn('DatabaseSeeder dengan akun demo dinonaktifkan pada environment production.');
+
+            return;
+        }
+
         // User::factory(10)->create();
 
         User::updateOrCreate(

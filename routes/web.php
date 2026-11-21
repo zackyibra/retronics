@@ -7,7 +7,6 @@ use App\Http\Controllers\AdminQrisController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\OtpPasswordResetController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RentalController;
 use App\Http\Controllers\RentalVerificationController;
@@ -51,27 +50,17 @@ Route::prefix('keranjang')->name('cart.')->group(function (): void {
 Route::middleware('guest')->group(function (): void {
     // Customer Login & Register
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/register', [AuthController::class, 'register']);
-
-    // Pemulihan Akun via WhatsApp OTP (Lupa Password)
-    Route::prefix('lupa-password')->name('otp.')->group(function (): void {
-        Route::get('/', [OtpPasswordResetController::class, 'showRequestForm'])->name('request');
-        Route::post('/kirim', [OtpPasswordResetController::class, 'sendOtp'])->name('send');
-        Route::get('/verifikasi', [OtpPasswordResetController::class, 'showVerifyForm'])->name('verify');
-        Route::post('/verifikasi', [OtpPasswordResetController::class, 'verifyOtp'])->name('verify.submit');
-        Route::get('/reset', [OtpPasswordResetController::class, 'showResetPasswordForm'])->name('reset');
-        Route::post('/reset', [OtpPasswordResetController::class, 'resetPassword'])->name('reset.submit');
-    });
+    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
 
     // Pemisahan Portal Login Khusus Administrator
     Route::get('/admin/login', [AuthController::class, 'showAdminLogin'])->name('admin.login');
-    Route::post('/admin/login', [AuthController::class, 'adminLogin'])->name('admin.login.submit');
+    Route::post('/admin/login', [AuthController::class, 'adminLogin'])->name('admin.login.submit')->middleware('throttle:5,1');
 });
 
-Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])
+Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
 

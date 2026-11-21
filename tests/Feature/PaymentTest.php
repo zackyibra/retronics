@@ -218,6 +218,7 @@ class PaymentTest extends TestCase
         // Customer resubmits payment
         $response = $this->post(route('rentals.pay', $rental->id), [
             'payment_method' => 'transfer_mandiri',
+            'payment_proof' => UploadedFile::fake()->image('bukti_baru.jpg'),
             'notes' => 'Upload ulang bukti jelas.',
         ]);
 
@@ -277,6 +278,8 @@ class PaymentTest extends TestCase
             'payment_date' => now(),
             'status' => Payment::STATUS_WAITING_VERIFICATION,
         ]);
+
+        $rental->update(['status' => 'waiting_verification']);
 
         $this->actingAs($this->admin);
 
@@ -388,5 +391,94 @@ class PaymentTest extends TestCase
         $this->assertInstanceOf(BelongsTo::class, $payment->verifiedBy());
         $this->assertInstanceOf(BelongsTo::class, $payment->verifier());
         $this->assertEquals($this->admin->id, $payment->verifiedBy->id);
+    }
+
+    /**
+     * Test submitting payment is rejected if rental is not in pending_payment status.
+     */
+    public function test_customer_cannot_submit_payment_for_confirmed_or_in_use_rental(): void
+    {
+        $rental = $this->createPendingRental(250000);
+        $rental->update(['status' => 'confirmed']);
+
+        $this->actingAs($this->customer);
+
+        $response = $this->post(route('rentals.pay', $rental->id), [
+            'payment_method' => 'transfer_bca',
+        ]);
+
+        $response->assertRedirect(route('rentals.show', $rental->id));
+        $response->assertSessionHas('error');
+
+        $rental->refresh();
+        $this->assertEquals('confirmed', $rental->status);
+    }
+
+    /**
+     * Test verifying rental payment is rejected if rental is not in waiting_verification status.
+     */
+    public function test_admin_cannot_verify_payment_when_not_waiting_verification(): void
+    {
+        $rental = $this->createPendingRental(300000);
+        $rental->update(['status' => 'confirmed']);
+        $initialStock = $this->product->fresh()->stock;
+
+        $this->actingAs($this->admin);
+
+        $response = $this->post(route('admin.rentals.verify', $rental->id), [
+            'action' => 'approve',
+        ]);
+
+        $response->assertSessionHas('error');
+        $this->assertEquals($initialStock, $this->product->fresh()->stock);
+    }
+
+    /**
+     * Test direct payment verification is rejected if payment or rental is not in waiting_verification status.
+     */
+    public function test_admin_cannot_verify_payment_direct_when_not_waiting_verification(): void
+    {
+        $rental = $this->createPendingRental(300000);
+        $rental->update(['status' => 'confirmed']);
+
+        $payment = Payment::create([
+            'rental_id' => $rental->id,
+            'payment_code' => 'PAY-DIRECT-ALREADY-VERIFIED',
+            'amount' => 300000,
+            'payment_method' => 'transfer_bca',
+            'payment_date' => now(),
+            'status' => Payment::STATUS_SUCCESS,
+        ]);
+
+        $initialStock = $this->product->fresh()->stock;
+
+        $this->actingAs($this->admin);
+
+        $response = $this->post(route('admin.payments.verify', $payment->id), [
+            'action' => 'approve',
+        ]);
+
+        $response->assertSessionHas('error');
+        $this->assertEquals($initialStock, $this->product->fresh()->stock);
+    }
+
+    public function test_payment_proof_is_required_unless_cash_store(): void
+    {
+        $rental = $this->createPendingRental(200000);
+        $this->actingAs($this->customer);
+
+        // 1. Gagal jika transfer tanpa bukti pembayaran
+        $response = $this->post(route('rentals.pay', $rental->id), [
+            'payment_method' => 'transfer_bca',
+        ]);
+        $response->assertSessionHasErrors('payment_proof');
+
+        // 2. Berhasil jika bayar tunai di toko tanpa bukti pembayaran
+        $responseCash = $this->post(route('rentals.pay', $rental->id), [
+            'payment_method' => 'cash_store',
+            'notes' => 'Akan bayar tunai di toko saat pengambilan.',
+        ]);
+        $responseCash->assertRedirect(route('rentals.show', $rental->id));
+        $responseCash->assertSessionHas('success');
     }
 }

@@ -10,6 +10,7 @@ use App\Models\Product;
 use App\Models\Promotion;
 use App\Models\QrisSetting;
 use App\Models\Rental;
+use App\Models\RentalItem;
 use App\Models\RentalVerification;
 use App\Models\User;
 use Carbon\Carbon;
@@ -602,5 +603,124 @@ class AdminFileManagementTest extends TestCase
         $product->refresh();
         $this->assertNotNull($product->image);
         Storage::disk('public')->assertExists($product->image);
+    }
+
+    public function test_admin_can_store_product_via_form_and_modal(): void
+    {
+        $file = UploadedFile::fake()->image('sony_fx30.jpg');
+
+        $response = $this->actingAs($this->admin)->post(route('admin.products.store'), [
+            'category_id' => $this->category->id,
+            'name' => 'Sony FX30 Cinema',
+            'description' => 'Termasuk 2 baterai dan case.',
+            'price_per_day' => 250000,
+            'stock' => 3,
+            'condition' => 'Mulus 99%',
+            'image' => $file,
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseHas('products', [
+            'name' => 'Sony FX30 Cinema',
+            'category_id' => $this->category->id,
+            'price_per_day' => 250000,
+            'stock' => 3,
+            'condition' => 'Mulus 99%',
+        ]);
+
+        $product = Product::where('name', 'Sony FX30 Cinema')->first();
+        $this->assertNotNull($product->image);
+        Storage::disk('public')->assertExists($product->image);
+
+        // Pastikan halaman admin index merender barang, tombol tambah, dan tombol hapus
+        $viewRes = $this->actingAs($this->admin)->get(route('admin.products.index'));
+        $viewRes->assertStatus(200);
+        $viewRes->assertSee('+ Tambah Barang');
+        $viewRes->assertSee('Tambah Barang Baru');
+        $viewRes->assertSee('Sony FX30 Cinema');
+        $viewRes->assertSee(route('admin.products.destroy', $product->id));
+    }
+
+    public function test_admin_cannot_store_product_without_required_fields_but_optional_fields_allowed(): void
+    {
+        // 1. Gagal jika field wajib tidak diisi
+        $failRes = $this->actingAs($this->admin)->post(route('admin.products.store'), [
+            'name' => 'Barang Tanpa Kategori',
+        ]);
+        $failRes->assertSessionHasErrors(['category_id', 'price_per_day', 'stock', 'condition']);
+
+        // 2. Berhasil jika hanya field wajib yang diisi (deskripsi dan foto opsional)
+        $successRes = $this->actingAs($this->admin)->post(route('admin.products.store'), [
+            'category_id' => $this->category->id,
+            'name' => 'Canon Minimalist',
+            'price_per_day' => 150000,
+            'stock' => 2,
+            'condition' => 'Normal',
+        ]);
+        $successRes->assertRedirect();
+        $successRes->assertSessionHas('success');
+
+        $this->assertDatabaseHas('products', [
+            'name' => 'Canon Minimalist',
+            'description' => null,
+            'image' => null,
+        ]);
+    }
+
+    public function test_admin_can_delete_product_without_rental_history(): void
+    {
+        $file = UploadedFile::fake()->image('to_delete.jpg');
+        $path = $file->store('products', 'public');
+
+        $product = $this->createTestProduct([
+            'name' => 'Gear Akan Dihapus',
+            'image' => $path,
+        ]);
+
+        Storage::disk('public')->assertExists($path);
+
+        $response = $this->actingAs($this->admin)->delete(route('admin.products.destroy', $product->id));
+        $response->assertRedirect();
+        $response->assertSessionHas('success', 'Barang berhasil dihapus dari inventaris.');
+
+        $this->assertDatabaseMissing('products', [
+            'id' => $product->id,
+        ]);
+        Storage::disk('public')->assertMissing($path);
+    }
+
+    public function test_admin_cannot_delete_product_with_rental_history(): void
+    {
+        $product = $this->createTestProduct([
+            'name' => 'Kamera Bersejarah Sewa',
+        ]);
+
+        $rental = Rental::create([
+            'user_id' => $this->customer->id,
+            'rental_code' => 'RET-HIST-001',
+            'start_date' => now()->toDateString(),
+            'end_date' => now()->addDays(2)->toDateString(),
+            'duration_days' => 2,
+            'total_price' => 300000,
+            'status' => 'completed',
+        ]);
+
+        RentalItem::create([
+            'rental_id' => $rental->id,
+            'product_id' => $product->id,
+            'quantity' => 1,
+            'price_per_day' => 150000,
+            'subtotal' => 300000,
+        ]);
+
+        $response = $this->actingAs($this->admin)->delete(route('admin.products.destroy', $product->id));
+        $response->assertRedirect();
+        $response->assertSessionHas('error', 'Barang tidak dapat dihapus karena memiliki riwayat transaksi penyewaan.');
+
+        $this->assertDatabaseHas('products', [
+            'id' => $product->id,
+        ]);
     }
 }

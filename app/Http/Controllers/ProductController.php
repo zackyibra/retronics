@@ -20,14 +20,16 @@ class ProductController extends Controller
         $categories = Category::query()
             ->where('is_active', true)
             ->withCount(['products' => function ($query): void {
-                $query->where('is_active', true);
+                $query->where('is_active', true)
+                    ->where(fn ($q) => $q->whereNull('condition')->orWhere('condition', 'not like', '%Perawatan%'));
             }])
             ->orderBy('name')
             ->get();
 
         $query = Product::query()
             ->with('category')
-            ->where('is_active', true);
+            ->where('is_active', true)
+            ->where(fn ($q) => $q->whereNull('condition')->orWhere('condition', 'not like', '%Perawatan%'));
 
         // Filter by category slug or id
         if ($request->filled('category')) {
@@ -82,6 +84,7 @@ class ProductController extends Controller
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
             ->where('is_active', true)
+            ->where(fn ($q) => $q->whereNull('condition')->orWhere('condition', 'not like', '%Perawatan%'))
             ->take(4)
             ->get();
 

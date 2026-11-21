@@ -113,7 +113,7 @@
                            class="w-full bg-transparent text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none">
                 </div>
 
-                <!-- Remember & Forgot -->
+                <!-- Remember -->
                 <div class="flex items-center justify-between text-xs pt-1">
                     <label class="flex items-center gap-2 text-slate-600 cursor-pointer">
                         <input type="checkbox"
@@ -121,10 +121,6 @@
                                class="w-4 h-4 text-brand-600 rounded border-slate-300 focus:ring-brand-500">
                         <span>Ingat saya</span>
                     </label>
-
-                    <a href="{{ route('otp.request') }}" class="text-brand-600 hover:text-brand-700 font-semibold transition">
-                        Lupa password?
-                    </a>
                 </div>
 
                 <!-- Submit Button -->

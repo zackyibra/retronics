@@ -101,8 +101,5 @@ class RouteHealthCheckTest extends TestCase
 
         $response = $this->get(route('admin.login'));
         $this->assertEquals(200, $response->getStatusCode());
-
-        $response = $this->get(route('otp.request'));
-        $this->assertEquals(200, $response->getStatusCode());
     }
 }

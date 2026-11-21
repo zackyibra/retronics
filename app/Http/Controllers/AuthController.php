@@ -20,7 +20,7 @@ class AuthController extends Controller
         if (Auth::check()) {
             return Auth::user()->isAdmin()
                 ? redirect()->route('admin.dashboard')
-                : redirect()->route('account.index');
+                : redirect()->route('home');
         }
 
         return view('auth.login');
@@ -50,7 +50,7 @@ class AuthController extends Controller
                     ->with('success', 'Selamat datang kembali di Dashboard Admin, '.Auth::user()->name);
             }
 
-            return redirect()->intended(route('account.index'))
+            return redirect()->intended(route('home'))
                 ->with('success', 'Berhasil masuk. Selamat datang kembali, '.Auth::user()->name);
         }
 
@@ -117,7 +117,7 @@ class AuthController extends Controller
     public function showRegister(): View|RedirectResponse
     {
         if (Auth::check()) {
-            return redirect()->route('account.index');
+            return redirect()->route('home');
         }
 
         return view('auth.register');
@@ -160,7 +160,7 @@ class AuthController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route('account.index')
+        return redirect()->route('home')
             ->with('success', 'Pendaftaran akun berhasil! Anda sekarang dapat melakukan penyewaan gear di Retronics.');
     }
 

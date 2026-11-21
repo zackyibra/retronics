@@ -16,7 +16,8 @@ class HomeController extends Controller
         $categories = Category::query()
             ->where('is_active', true)
             ->withCount(['products' => function ($query): void {
-                $query->where('is_active', true);
+                $query->where('is_active', true)
+                    ->where(fn ($q) => $q->whereNull('condition')->orWhere('condition', 'not like', '%Perawatan%'));
             }])
             ->orderBy('name')
             ->get();
@@ -24,6 +25,7 @@ class HomeController extends Controller
         $products = Product::query()
             ->with('category')
             ->where('is_active', true)
+            ->where(fn ($q) => $q->whereNull('condition')->orWhere('condition', 'not like', '%Perawatan%'))
             ->orderBy('id')
             ->get();
 
